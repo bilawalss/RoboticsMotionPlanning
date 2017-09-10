@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 
 /**
  * A simulator for the class Robotics Motion Planning.
+ * @author: Bilawal Shaikh and Thang Le
  */
 public class Main extends Application {
 
