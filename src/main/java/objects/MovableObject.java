@@ -15,4 +15,12 @@ public class MovableObject extends BaseObject implements Movable {
         // recompute the bounding box
         bbox = new BoundingBox(points);
     }
+
+    public void rotate(double angle) {
+
+        double xSum;
+        double ySum;
+
+        
+    }
 }
