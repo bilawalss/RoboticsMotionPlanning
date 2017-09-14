@@ -11,7 +11,6 @@ import javafx.stage.Stage;
  * @author: Bilawal Shaikh and Thang Le
  */
 public class Main extends Application {
-
     @Override
     public void start(Stage stage) {
         Group root = new Group();
