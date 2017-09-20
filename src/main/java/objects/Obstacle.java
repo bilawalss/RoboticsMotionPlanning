@@ -1,13 +1,11 @@
 package objects;
 
 
-import java.util.Arrays;
-
-public class BaseObject {
+public class Obstacle {
     protected Point[] points;
     protected BoundingBox bbox;
 
-    public BaseObject (Point[] points) {
+    public Obstacle(Point[] points) {
         if (points == null || points.length == 0)
             return;
 
@@ -17,7 +15,7 @@ public class BaseObject {
         bbox = new BoundingBox(points);
     }
 
-    public boolean collidesWith (BaseObject other) {
+    public boolean collidesWith (Obstacle other) {
         return bbox.collidesWith(other.bbox);
     }
 

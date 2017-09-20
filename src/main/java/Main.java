@@ -5,7 +5,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.shape.Polygon;
 import javafx.stage.Stage;
-import objects.BaseObject;
+import objects.Obstacle;
 import objects.Point;
 
 /**
@@ -27,7 +27,7 @@ public class Main extends Application {
         Scanner sc = new Scanner(obstacleStream);
 
         int numberOfObstacles = sc.nextInt();
-        BaseObject [] obstacles = new BaseObject[numberOfObstacles];
+        Obstacle[] obstacles = new Obstacle[numberOfObstacles];
 
         if (sc.hasNextInt()) {
 
@@ -42,7 +42,7 @@ public class Main extends Application {
                     points[j] = point;
                 }
                 polygons.getChildren().add(polygon);
-                obstacles[i] = new BaseObject(points);
+                obstacles[i] = new Obstacle(points);
             }
         }
         System.out.println(obstacles[0].collidesWith(obstacles[1]));
