@@ -3,10 +3,9 @@ package objects;
 import java.util.Random;
 
 public class Sampler {
-
     // dimension of the workspace
     private double width, height;
-    private rand = new Random();
+    private Random rand = new Random();
 
     public Sampler (double width, double height) {
         this.width = width;
@@ -24,18 +23,24 @@ public class Sampler {
         double cy = rand.nextDouble() * (height - diameter) + radius;
 
         double x1, y1, x2, y2;
-        double tmpTerm = Math.sqrt(radius * radius / (slope * slope + 1));
+        double r = radius, m = slope;
+        double tmpTerm = Math.sqrt(r * r / (m * m + 1));
 
-        if (slope >= 0) {
+        if (slope == Double.POSITIVE_INFINITY) {
+            x1 = cx;
+            x2 = cx;
+            y1 = cy - r;
+            y2 = cy + r;
+        } else if (slope >= 0) {
             x1 = tmpTerm + cx;
-            y1 = m*tmpTerm + cy;
+            y1 = m * tmpTerm + cy;
             x2 = -tmpTerm + cx;
-            y2 = -m*tmpTerm + cy;
+            y2 = -m * tmpTerm + cy;
         } else {
             x1 = tmpTerm + cx;
-            y1 = -m*tmpTerm + cy;
+            y1 = -m * tmpTerm + cy;
             x2 = -tmpTerm + cx;
-            y2 = m*tmpTerm + cy;
+            y2 = m * tmpTerm + cy;
         }
 
         Point p1 = new Point(x1, y1);

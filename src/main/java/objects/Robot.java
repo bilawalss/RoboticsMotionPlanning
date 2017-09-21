@@ -13,10 +13,15 @@ public class Robot {
     }
 
     public void rotate (double angle) {
-        // rotates around point x
-        this.y.setX((this.y.getX() - this.x.getX())*Math.cos(angle) - (this.y.getY() - this.x.getY())*Math.sin(angle) + this.x.getX());
+        // rotates around point center
+        double x = (this.x.getX() + this.y.getX())/2;
+        double y = (this.x.getY() + this.y.getY())/2;
 
-        this.y.setY((this.y.getX() - this.x.getX())*Math.sin(angle) - (this.y.getY() - this.x.getY())*Math.cos(angle) + this.x.getY());
+        this.x.setX((this.x.getX() - x)*Math.cos(angle) - (this.x.getY() - y)*Math.sin(angle) + x);
+        this.y.setY((this.x.getX() - x)*Math.sin(angle) - (this.x.getY() - y)*Math.cos(angle) + y);
+
+        this.y.setX((this.y.getX() - x)*Math.cos(angle) - (this.y.getY() - y)*Math.sin(angle) + x);
+        this.y.setY((this.y.getX() - x)*Math.sin(angle) - (this.y.getY() - y)*Math.cos(angle) + y);
         
     }
 
@@ -27,12 +32,6 @@ public class Robot {
          y.setX(y.getX() + dx);
          y.setY(y.getY() + dy);
 
-    }
-
-    public double getAngle() {
-        double h = getHypotenuse();
-        double d = this.x.getX() - this.y.getX();
-        return Math.acos(d/h);
     }
 
     public double getHypotenuse() {
@@ -62,6 +61,7 @@ public class Robot {
         for (Point p : points) {
             System.out.println(p.getX()+" "+p.getY());
         }
+        System.out.println();
         return points;
     }
 

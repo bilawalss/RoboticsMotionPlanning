@@ -56,6 +56,10 @@ public class Main extends Application {
         Robot robot = new Robot(a, c);
 
         Point [] robotPoints = robot.getPoints();
+        robot.move(10, 40);
+        robot.getPoints();
+        robot.rotate(Math.PI/2);
+        robot.getPoints();
 
         for (int i = 0; i < 4; i++) {
             robotPolygon.getPoints().addAll(robotPoints[i].getX(), robotPoints[i].getY());
