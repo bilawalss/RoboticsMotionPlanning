@@ -1,12 +1,14 @@
 import java.io.InputStream;
 import java.util.Scanner;
 import javafx.application.Application;
-import javafx.scene.Group;
+import javafx.scene.paint.Color;
+import javafx.scene.*;
 import javafx.scene.Scene;
 import javafx.scene.shape.Polygon;
 import javafx.stage.Stage;
 import objects.Obstacle;
 import objects.Point;
+import objects.Robot;
 
 /**
  * A simulator for the class Robotics Motion Planning.
@@ -34,6 +36,7 @@ public class Main extends Application {
             for (int i = 0; i < numberOfObstacles; i++) {
                 Polygon polygon = new Polygon();
                 int numberOfPoints = sc.nextInt();
+                System.out.println(numberOfPoints);
                 Point [] points = new Point[numberOfPoints];
                 for (int j = 0; j < numberOfPoints; j++) {
                     //Adding coordinates to the polygon
@@ -45,7 +48,22 @@ public class Main extends Application {
                 obstacles[i] = new Obstacle(points);
             }
         }
-        System.out.println(obstacles[0].collidesWith(obstacles[1]));
+       
+        Point a = new Point(sc.nextDouble(), sc.nextDouble());
+        Point c = new Point(sc.nextDouble(), sc.nextDouble());
+
+        Polygon robotPolygon = new Polygon();
+        Robot robot = new Robot(a, c);
+
+        Point [] robotPoints = robot.getPoints();
+
+        for (int i = 0; i < 4; i++) {
+            robotPolygon.getPoints().addAll(robotPoints[i].getX(), robotPoints[i].getY());
+        }
+        robotPolygon.setFill(Color.BLUE);
+        
+        polygons.getChildren().add(robotPolygon);
+    
         //Creating a scene object
         scene.setRoot(polygons);
         //Setting title to the Stage
@@ -61,4 +79,6 @@ public class Main extends Application {
     public static void main(String args[]) {
         launch(args);
     }
+
+    
 }
