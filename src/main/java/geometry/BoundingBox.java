@@ -30,4 +30,20 @@ public class BoundingBox {
             maxY = Math.max(maxY, y);    
         }
     }
+
+    public double getMinX() {
+        return this.minX;
+    }
+
+    public double getMaxX() {
+        return this.maxX;
+    }
+
+    public double getMinY() {
+        return this.minY;
+    }
+
+    public double getMaxY() {
+        return this.maxY;
+    }
 }

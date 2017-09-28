@@ -1,4 +1,6 @@
-from geometry import *;
+import geometry.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Environment {
 	private Robot robot;
@@ -9,14 +11,19 @@ public class Environment {
 		this.obstacles = obstacles;
 	}
 
-	public static boolean collisionCheck() {
+	public boolean collisionCheck() {
 		for (Polygon obstacle : obstacles) {
 			BoundingBox obstaclebbox = obstacle.getBoundingBox();
 			BoundingBox robotbbox = robot.getBoundingBox();
-			if (robotbbox.getMinX() > obstalcebbox.getMaxX() || obstaclebbox.getMinX() > robotbbox.getMaxX())
+
+			Vector obstaclePolygon = obstacle.getCentroid();
+			Vector robotPolygon = robot.getCentroid();
+			if (robotbbox.getMinX()+robotPolygon.get(0) > obstaclebbox.getMaxX()+obstaclePolygon.get(0) 
+				|| obstaclebbox.getMinX()+obstaclePolygon.get(0) > robotbbox.getMaxX()+robotPolygon.get(0)) 
 	            return false;
 
-	        if (robotbbox.getMinY() > obstaclebbox.getMaxY() || robotbbox.getMinY() > obstaclebbox.getMaxY()) 
+	        if (robotbbox.getMinY()+robotPolygon.get(1) > obstaclebbox.getMaxY()+obstaclePolygon.get(1) 
+	        	|| robotbbox.getMinY()+robotPolygon.get(1) > obstaclebbox.getMaxY()+obstaclePolygon.get(1)) 
 	           return false;
 		}
 

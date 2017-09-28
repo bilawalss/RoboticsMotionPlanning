@@ -17,6 +17,10 @@ public class Polygon {
         this.bbox = new BoundingBox(pointMat);
     }
 
+    public BoundingBox getBoundingBox() {
+        return bbox;
+    }
+
     public Vector getCentroid () {
         return new Vector(centroid);
     }
