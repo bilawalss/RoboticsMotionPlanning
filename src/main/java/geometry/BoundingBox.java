@@ -30,14 +30,4 @@ public class BoundingBox {
             maxY = Math.max(maxY, y);    
         }
     }
-
-    public boolean collidesWith (BoundingBox other) {
-        if (this.minX > other.maxX || other.minX > this.maxX)
-            return false;
-
-        if (this.minY > other.maxY || other.minY > this.maxY) 
-           return false;
-
-       return true; 
-    }
 }

@@ -23,29 +23,44 @@ public class RobotTest {
 
     @BeforeEach
     void init() {
-        double[] array = new double[] { -1, 2, 1, -2, 2, 3, -2, -2 };
+        double[] array = new double[] { -1, 2, 3, 1, 1, 2, -1, -1 };
 
         SimpleMatrix points = new SimpleMatrix(2, 4, true, array);
-        robot = new Robot(points, new Vector(1, 1));
+        robot = new Robot(points);
     }
 
+
+    @Test
+    void testConstructor() {
+        // check centroid
+        Vector centroid = robot.getCentroid(); 
+        assertEquals(centroid.get(0), 1.25, 0.001);
+        assertEquals(centroid.get(1), 0.25, 0.001);
+
+        // check if points are relative to centroid
+        double[] points = new double[] { -2.25, 0.75, 1.75, -0.25,
+                                         0.75, 1.75, -1.25, -1.25 }; 
+        SimpleMatrix expected = new SimpleMatrix(2, 4, true, points);
+        assertTrue(robot.getPointMat().isIdentical(expected, 0.001));
+    }
 
     @Test
     void testMove() {
         robot.move(1, 2);
 
-        Vector[] points = robot.getPoints();
-        SimpleMatrix pointMat = robot.getPointMat();
-
-        double[] array = new double[] { 0, 3, 2, -1, 4, 5, 0, 0 };
-        SimpleMatrix expectedMat = new SimpleMatrix(2, 4, true, array);
-
-        assertTrue(pointMat.isIdentical(expectedMat, 0.001));
+        // check centroid
+        Vector centroid = robot.getCentroid(); 
+        assertEquals(centroid.get(0), 2.25, 0.001);
+        assertEquals(centroid.get(1), 2.25, 0.001);
     }
-
 
     @Test
     void testRotate() {
-        robot.rotate(Math.PI / 2); 
+        robot.rotate(Math.PI / 2.0);
+
+        // check centroid
+        Vector centroid = robot.getCentroid(); 
+        assertEquals(centroid.get(0), -0.25, 0.001);
+        assertEquals(centroid.get(1), 1.25, 0.001);
     }
 }
