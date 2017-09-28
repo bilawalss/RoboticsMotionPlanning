@@ -1,6 +1,9 @@
 import geometry.*;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import org.ejml.simple.SimpleMatrix;
 
 public class Environment {
 	private Robot robot;
@@ -11,22 +14,25 @@ public class Environment {
 		this.obstacles = obstacles;
 	}
 
-	public boolean collisionCheck() {
-		for (Polygon obstacle : obstacles) {
-			BoundingBox obstaclebbox = obstacle.getBoundingBox();
-			BoundingBox robotbbox = robot.getBoundingBox();
+    public static boolean pairCollision (Polygon p1, Polygon p2) {
+        BoundingBox b1 = p1.getBoundingBox();
+        BoundingBox b2 = p2.getBoundingBox();
 
-			Vector obstaclePolygon = obstacle.getCentroid();
-			Vector robotPolygon = robot.getCentroid();
-			if (robotbbox.getMinX()+robotPolygon.get(0) > obstaclebbox.getMaxX()+obstaclePolygon.get(0) 
-				|| obstaclebbox.getMinX()+obstaclePolygon.get(0) > robotbbox.getMaxX()+robotPolygon.get(0)) 
-	            return false;
+        // one on the left of the other
+        if (b1.getMinX() > b2.getMaxX() || b2.getMinX() > b1.getMaxX())
+            return false;
 
-	        if (robotbbox.getMinY()+robotPolygon.get(1) > obstaclebbox.getMaxY()+obstaclePolygon.get(1) 
-	        	|| robotbbox.getMinY()+robotPolygon.get(1) > obstaclebbox.getMaxY()+obstaclePolygon.get(1)) 
-	           return false;
-		}
+        // one on top of the other
+        if (b1.getMinY() > b2.getMaxY() || b2.getMinY() > b1.getMaxY())
+            return false;
 
-		return true;
-	}
+        return true;
+    }
+
+    public static Polygon getWorldPolygon(Polygon p) {
+        Vector centroid = p.getCentroid();
+        SimpleMatrix pointMat = p.getPointMat();
+        SimpleMatrix worldMat = Vector.addVectorToMatrix(pointMat, centroid.negate());
+        return new Polygon(worldMat);
+    }
 }

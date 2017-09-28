@@ -32,6 +32,12 @@ public class Vector {
         return new Vector(x, y);
     }
 
+    public Vector negate() {
+        double x = -this.get(0);
+        double y = -this.get(1);
+        return new Vector(x, y);
+    }
+
     public SimpleMatrix getMatrix() {
         return new SimpleMatrix(mat);
     }
