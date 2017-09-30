@@ -3,7 +3,7 @@ package geometry;
 import org.ejml.simple.SimpleMatrix;
 
 public class Robot extends PolygonObject {
-    public Robot (double[][] points) {
+    public Robot (double[] points) {
         super(points);
     }
 

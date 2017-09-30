@@ -14,17 +14,17 @@ public class BoundingBox {
         this.maxY = maxY;
     }
 
-    public BoundingBox (double[][] points) {
-        minX = points[0][0];
-        maxX = points[0][0];
-        minY = points[0][1];
-        maxX = points[0][1];
+    public BoundingBox (double[] points) {
+        minX = points[0];
+        maxX = points[0];
+        minY = points[1];
+        maxX = points[1];
 
-        for (int i = 1; i < points.length; i++) {
-            minX = Math.min(minX, points[i][0]);
-            maxX = Math.max(maxX, points[i][0]);
-            minY = Math.min(minY, points[i][1]);
-            maxY = Math.max(maxY, points[i][1]);
+        for (int i = 2; i < points.length; i+= 2) {
+            minX = Math.min(minX, points[i]);
+            maxX = Math.max(maxX, points[i]);
+            minY = Math.min(minY, points[i+1]);
+            maxY = Math.max(maxY, points[i+1]);
         }
     }
 
