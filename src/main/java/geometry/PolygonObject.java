@@ -12,6 +12,8 @@ public class PolygonObject {
         
         // create list of vectors
         for (int i = 0; i < points.length; i++) {
+            // SimpleMatrix(int numRows, int numCols, boolean rowMajor, double... data)
+            // Creates a new matrix which has the same value as the matrix encoded in the provided array.
             SimpleMatrix p = new SimpleMatrix(2, 1, true, points[i]);
             vectors.add(p);
         }
