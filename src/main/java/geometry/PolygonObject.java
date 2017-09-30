@@ -17,9 +17,6 @@ public class PolygonObject {
         // create list of vectors
         for (int i = 0; i < points.length; i+= 2) {
             SimpleMatrix p = new SimpleMatrix(2, 1, true, new double[] { points[i], points[i+1] });
-            if (DEBUG) {
-                System.out.println(p);
-            }
             vectors.add(p);
         }
 
