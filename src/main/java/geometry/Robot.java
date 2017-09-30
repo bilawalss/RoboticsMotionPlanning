@@ -2,16 +2,17 @@ package geometry;
 
 import org.ejml.simple.SimpleMatrix;
 
-public class Robot extends Polygon {
-    
-    public Robot (SimpleMatrix pointMat) {
-        super(pointMat);
+public class Robot extends PolygonObject {
+    public Robot (double[][] points) {
+        super(points);
     }
 
     public void move (double dx, double dy) {
-        // move the centroid
-        centroid.set(0, centroid.get(0) + dx);
-        centroid.set(1, centroid.get(1) + dy);   
+        // move all points
+        for (SimpleMatrix p: vectors) {
+            p.set(0, 0, p.get(0, 0) + dx);
+            p.set(1, 0, p.get(0, 1) + dy);
+        }    
     }
 
     public void rotate (double angle) {
@@ -22,14 +23,10 @@ public class Robot extends Polygon {
                 cosAngle, -sinAngle,
                 sinAngle, cosAngle);
 
-        pointMat = rotationMat.mult(pointMat);
-
-        // recompute the centroid
-        SimpleMatrix newCentroid = rotationMat.mult(centroid.getMatrix());
-        centroid.set(0, newCentroid.get(0, 0));
-        centroid.set(1, newCentroid.get(1, 0));
-
-        // recompute the bounding box
-        bbox = new BoundingBox(pointMat);
+        // rotate all points
+        for (int i = 0; i < vectors.size(); i++) {
+            SimpleMatrix newPoint = rotationMat.mult(vectors.get(i));
+            vectors.set(i, newPoint);
+        } 
     }    
 }

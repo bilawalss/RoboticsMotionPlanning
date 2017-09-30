@@ -36,3 +36,8 @@ hs_err_pid*
 .idea/
 .idea-modules/
 
+# Swap
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-v][a-z]
+[._]sw[a-p]

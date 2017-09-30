@@ -4,8 +4,8 @@ import java.util.List;
 import org.ejml.simple.SimpleMatrix;
 
 public class BoundingBox {
-    double minX, maxX;
-    double minY, maxY;
+    protected double minX, maxX;
+    protected double minY, maxY;
 
     public BoundingBox (double minX, double maxX, double minY, double maxY) {
         this.minX = minX;
@@ -14,20 +14,17 @@ public class BoundingBox {
         this.maxY = maxY;
     }
 
-    public BoundingBox (SimpleMatrix pointMat) {
-        minX = Double.MAX_VALUE;
-        maxX = Double.MIN_VALUE;
-        minY = Double.MAX_VALUE;
-        maxX = Double.MIN_VALUE;
+    public BoundingBox (double[][] points) {
+        minX = points[0][0];
+        maxX = points[0][0];
+        minY = points[0][1];
+        maxX = points[0][1];
 
-        for (int j = 0; j < pointMat.numCols(); j++) {
-            double x = pointMat.get(0, j);
-            double y = pointMat.get(1, j);
-
-            minX = Math.min(minX, x);
-            maxX = Math.max(maxX, x);
-            minY = Math.min(minY, y);
-            maxY = Math.max(maxY, y);    
+        for (int i = 1; i < points.length; i++) {
+            minX = Math.min(minX, points[i][0]);
+            maxX = Math.max(maxX, points[i][0]);
+            minY = Math.min(minY, points[i][1]);
+            maxY = Math.max(maxY, points[i][1]);
         }
     }
 

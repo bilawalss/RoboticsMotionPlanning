@@ -7,14 +7,14 @@ import org.ejml.simple.SimpleMatrix;
 
 public class Environment {
 	private Robot robot;
-	private List<Polygon> obstacles;
+	private List<PolygonObject> obstacles;
 
-	public Environment(Robot robot, List<Polygon> obstacles) {
+	public Environment(Robot robot, List<PolygonObject> obstacles) {
 		this.robot = robot;
 		this.obstacles = obstacles;
 	}
 
-    public static boolean pairCollision (Polygon p1, Polygon p2) {
+    public static boolean pairCollision (PolygonObject p1, PolygonObject p2) {
         BoundingBox b1 = p1.getBoundingBox();
         BoundingBox b2 = p2.getBoundingBox();
 
@@ -27,12 +27,5 @@ public class Environment {
             return false;
 
         return true;
-    }
-
-    public static Polygon getWorldPolygon(Polygon p) {
-        Vector centroid = p.getCentroid();
-        SimpleMatrix pointMat = p.getPointMat();
-        SimpleMatrix worldMat = Vector.addVectorToMatrix(pointMat, centroid.negate());
-        return new Polygon(worldMat);
     }
 }
