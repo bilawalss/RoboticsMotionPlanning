@@ -31,7 +31,7 @@ public class Environment {
 
     public boolean checkCollision (Configuration c) {
         for (PolygonObject o: obstacles) {
-            if (pairCollision(obstacle, c)) {
+            if (pairCollision(o, c)) {
                 return true;
             }
         }
