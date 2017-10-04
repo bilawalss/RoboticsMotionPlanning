@@ -84,6 +84,36 @@ public class Main extends Application {
             polygons.getChildren().add(poly); 
         }
 
+        if (DEBUG) {
+            Group obstacleRoot = new Group();
+            Stage obstacleStage = new Stage();
+            Scene obstacleScene = new Scene(obstacleRoot, 600, 600);
+
+            System.out.println("Debug Environment");
+            for (PolygonObject obstacle : obstacles ) {
+                Polygon obstaclePolygon = new Polygon();
+                obstaclePolygon.getPoints().addAll(obstacle.getPointArray());
+                obstacleRoot.getChildren().add(obstaclePolygon);
+            }
+
+            Robot r = new Robot(new double[] { -62.5, -75, 37.5, -75, 87.5, 75, -62.5, 75 });
+            Configuration c = new Configuration(412.5, 425);
+            
+            Environment env = new Environment(r, obstacles);
+            Polygon original = new Polygon(); 
+            original.setFill(Color.BLUE);
+            if (env.checkCollision(c)) {
+                original.setFill(Color.RED);
+            }
+            
+            original.getPoints().addAll(r.getPointArray(c));
+            obstacleRoot.getChildren().add(original);
+            obstacleStage.setScene(obstacleScene);
+            obstacleStage.show();
+
+            return;
+            
+        }
         // test Robot 
         if (DEBUG) {
             Group robotRoot = new Group();
@@ -93,7 +123,7 @@ public class Main extends Application {
             System.out.println("Debug Robot");
             Robot r = new Robot(new double[] { -62.5, -75, 37.5, -75, 87.5, 75, -62.5, 75 });
             Configuration c = new Configuration(412.5, 425);
-           
+            
             // original
             Polygon original = new Polygon(); 
             original.getPoints().addAll(r.getPointArray(c));
