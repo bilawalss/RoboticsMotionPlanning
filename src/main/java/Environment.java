@@ -9,15 +9,19 @@ import org.ejml.simple.SimpleMatrix;
 public class Environment {
 	private Robot robot;
 	private List<PolygonObject> obstacles;
+    private double worldWidth, worldHeight;
 
-	public Environment(Robot robot, List<PolygonObject> obstacles) {
+	public Environment(Robot robot, List<PolygonObject> obstacles, double worldWidth,
+            double worldHeight) {
 		this.robot = robot;
 		this.obstacles = obstacles;
+        this.worldWidth = worldWidth;
+        this.worldHeight = worldHeight;
 	}
 
     private boolean pairCollision (PolygonObject obstacle, Configuration c) {
         BoundingBox b1 = obstacle.getBoundingBox();
-        BoundingBox b2 = robot.getBoundingBox();
+        BoundingBox b2 = robot.getBoundingBox(c);
 
         // one on the left of the other
         if (b1.getMinX() > b2.getMaxX() + c.getX() || b2.getMinX() + c.getX() > b1.getMaxX())
@@ -37,5 +41,17 @@ public class Environment {
             }
         }
         return false;
+    }
+
+    public double getWorldWidth () {
+        return worldWidth;
+    }
+
+    public double getWorldHeight() {
+        return worldHeight;
+    }
+
+    public Double[] getRobotPointArray (Configuration c) {
+       return robot.getPointArray(c);     
     }
 }

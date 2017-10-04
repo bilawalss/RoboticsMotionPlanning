@@ -2,10 +2,15 @@ import java.util.*;
 import java.io.InputStream;
 
 import javafx.application.Application;
+import javafx.stage.Stage;
+
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+
 import javafx.scene.paint.Color;
 import javafx.scene.Scene;
 import javafx.scene.Group;
-import javafx.stage.Stage;
+import javafx.scene.control.Button;
 import javafx.scene.shape.Polygon;
 
 import org.ejml.simple.SimpleMatrix;
@@ -49,9 +54,7 @@ public class Main extends Application {
 
         List<PolygonObject> obstacles = new ArrayList<>();
 
-        if (DEBUG) {
-            System.out.println("Read file");
-        }
+        // read obstacle file
         while (sc.hasNextLine()) {
             String line = sc.nextLine().trim(); 
             if (line.isEmpty())
@@ -67,10 +70,8 @@ public class Main extends Application {
             obstacles.add(new PolygonObject(data));
         }
 
+
         // draw the list of obstacles
-        if (DEBUG) {
-            System.out.println("Get points to draw");
-        }        
         for (PolygonObject o: obstacles) {
             Polygon poly = new Polygon();
             poly.getPoints().addAll(o.getPointArray()); 
@@ -84,36 +85,66 @@ public class Main extends Application {
             polygons.getChildren().add(poly); 
         }
 
+        // debug motion planner  
         if (DEBUG) {
-            Group obstacleRoot = new Group();
-            Stage obstacleStage = new Stage();
-            Scene obstacleScene = new Scene(obstacleRoot, 600, 600);
+            System.out.println("Debug motion planner");
 
-            System.out.println("Debug Environment");
+            Group debugRoot = new Group();
+            Stage debugStage = new Stage();
+            Scene debugScene = new Scene(debugRoot, 600, 600);
+
+            
             for (PolygonObject obstacle : obstacles ) {
                 Polygon obstaclePolygon = new Polygon();
                 obstaclePolygon.getPoints().addAll(obstacle.getPointArray());
-                obstacleRoot.getChildren().add(obstaclePolygon);
+                debugRoot.getChildren().add(obstaclePolygon);
             }
 
             Robot r = new Robot(new double[] { -62.5, -75, 37.5, -75, 87.5, 75, -62.5, 75 });
-            Configuration c = new Configuration(412.5, 425);
             
-            Environment env = new Environment(r, obstacles);
-            Polygon original = new Polygon(); 
+            // create motion planner
+            Environment env = new Environment(r, obstacles, 600, 400);
+            Sampler sampler = new Sampler();
+
+            MotionPlanner planner = MotionPlanner.getInstance();
+            planner.setEnvironment(env);
+            planner.setSampler(sampler);
+
+            Polygon original = new Polygon();
+
+            // add a button
+            Button btn = new Button();
+            btn.setText("sampling");
+            btn.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    planner.sampling();
+                    original.getPoints().clear();
+                    original.getPoints().addAll(planner.getRobotPointArray());
+                    original.setFill(Color.BLUE);
+
+                    if (planner.checkCollision()) {
+                        original.setFill(Color.RED);
+                    }
+                }
+            }); 
+
+            planner.sampling();
+            original.getPoints().addAll(planner.getRobotPointArray());
             original.setFill(Color.BLUE);
-            if (env.checkCollision(c)) {
+
+            if (planner.checkCollision()) {
                 original.setFill(Color.RED);
             }
-            
-            original.getPoints().addAll(r.getPointArray(c));
-            obstacleRoot.getChildren().add(original);
-            obstacleStage.setScene(obstacleScene);
-            obstacleStage.show();
+
+            debugRoot.getChildren().add(original);
+            debugRoot.getChildren().add(btn);
+            debugStage.setScene(debugScene);
+            debugStage.show();
 
             return;
-            
         }
+
         // test Robot 
         if (DEBUG) {
             Group robotRoot = new Group();
@@ -130,7 +161,7 @@ public class Main extends Application {
 
             // after move and rotate
             c = c.move(-200, -200);
-            r.rotate(Math.PI / 2);
+            r = r.rotate(Math.PI / 2);
 
             Polygon afterMove = new Polygon();
             afterMove.getPoints().addAll(r.getPointArray(c));

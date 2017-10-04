@@ -7,7 +7,7 @@ public class Robot extends PolygonObject {
         super(points);
     }
 
-    public void rotate (double angle) {
+    public Robot rotate (double angle) {
         double sinAngle = Math.sin(angle);
         double cosAngle = Math.cos(angle);
 
@@ -16,14 +16,28 @@ public class Robot extends PolygonObject {
                 sinAngle, cosAngle);
 
         // rotate all points
+        double[] points = new double[vectors.size() * 2];
+        int j = 0;
+
         for (int i = 0; i < vectors.size(); i++) {
             SimpleMatrix newPoint = rotationMat.mult(vectors.get(i));
-            vectors.set(i, newPoint);
+            points[j++] = newPoint.get(0, 0);
+            points[j++] = newPoint.get(1, 0);
         } 
+
+        return new Robot(points);
     }    
 
+    public BoundingBox getBoundingBox(Configuration config) {
+        Robot rotatedRobot = rotate(config.getAngle());
+        return rotatedRobot.getBoundingBox();
+    }
+
     public Double[] getPointArray(Configuration config) {
-        Double[] res = getPointArray();
+        // rotate the robot based on the angle in the configuration
+        Robot rotatedRobot = rotate(config.getAngle());
+        Double[] res = rotatedRobot.getPointArray();
+
         double cx = config.getX(), cy = config.getY();
 
         for (int i = 0; i < res.length; i++) {

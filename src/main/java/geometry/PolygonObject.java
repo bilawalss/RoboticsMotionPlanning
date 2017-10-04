@@ -61,5 +61,7 @@ public class PolygonObject {
         for (int i = 1; i < res.length; i += 2) {
             res[i] = screenHeight - res[i];
         }
+
+        return res;
     }
 }

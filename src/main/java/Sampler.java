@@ -1,19 +1,13 @@
-import java.util.*;
-import geometry.*;
+import java.util.Random;
+
+import geometry.Configuration;
 
 public class Sampler {
-
-	public final int worldWidth, worldHeight;
-
-	public Sampler(int width, int height) {
-		worldWidth = width;
-		worldHeight = height;
-	}
-
-	public Configuration getSamplePoint() {
-			Random rand = new Random();
-			double randX = rand.nextDouble() * worldWidth;
-			double randY = rand.nextDouble() * worldHeight;
-			return new Configuration(randX, randY);
+	public Configuration getSamplePoint(double worldWidth, double worldHeight) {
+		Random rand = new Random();
+		double randX = rand.nextDouble() * worldWidth;
+		double randY = rand.nextDouble() * worldHeight;
+        double randAngle = rand.nextDouble() * 2 * Math.PI;
+		return new Configuration(randX, randY, randAngle);
 	}
 }

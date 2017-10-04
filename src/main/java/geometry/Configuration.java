@@ -4,11 +4,17 @@ import org.ejml.simple.SimpleMatrix;
 
 public class Configuration {
     private double x, y;
+    private double angle;
 
-	public Configuration(double x, double y) {
+	public Configuration(double x, double y, double angle) {
         this.x = x;
         this.y = y;
+        this.angle = angle;
 	} 
+
+    public Configuration(double x, double y) {
+        this(x, y, 0.0);
+    }
 
     public double getX() {
         return x;
@@ -16,6 +22,10 @@ public class Configuration {
 
     public double getY() {
         return y;
+    }
+
+    public double getAngle() {
+        return angle;
     }
 
     public void setX(double val) {
