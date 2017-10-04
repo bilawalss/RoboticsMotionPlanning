@@ -1,5 +1,5 @@
-import java.io.InputStream;
 import java.util.*;
+import java.io.InputStream;
 
 import javafx.application.Application;
 import javafx.scene.paint.Color;
@@ -11,6 +11,9 @@ import javafx.scene.shape.Polygon;
 import org.ejml.simple.SimpleMatrix;
 
 import geometry.PolygonObject;
+import geometry.Robot;
+import geometry.Configuration;
+
 import static global.Constants.DEBUG;
 
 /**
@@ -79,6 +82,36 @@ public class Main extends Application {
             }
 
             polygons.getChildren().add(poly); 
+        }
+
+        // test Robot 
+        if (DEBUG) {
+            Group robotRoot = new Group();
+            Stage robotStage = new Stage();
+            Scene robotScene = new Scene(robotRoot, 600, 600);
+
+            System.out.println("Debug Robot");
+            Robot r = new Robot(new double[] { -62.5, -75, 37.5, -75, 87.5, 75, -62.5, 75 });
+            Configuration c = new Configuration(412.5, 425);
+           
+            // original
+            Polygon original = new Polygon(); 
+            original.getPoints().addAll(r.getPointArray(c));
+
+            // after move and rotate
+            c = c.move(-200, -200);
+            r.rotate(Math.PI / 2);
+
+            Polygon afterMove = new Polygon();
+            afterMove.getPoints().addAll(r.getPointArray(c));
+
+            robotRoot.getChildren().add(original);
+            robotRoot.getChildren().add(afterMove);
+            
+            robotStage.setScene(robotScene);
+            robotStage.show();
+
+            return;
         }
 
         //Adding scene to the stage

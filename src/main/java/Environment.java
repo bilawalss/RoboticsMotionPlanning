@@ -20,11 +20,11 @@ public class Environment {
         BoundingBox b2 = p2.getBoundingBox();
 
         // one on the left of the other
-        if (b1.getMinX() > b2.getMaxX() + c.getCentroidX() || b2.getMinX() + c.getCentroidX() > b1.getMaxX())
+        if (b1.getMinX() > b2.getMaxX() + c.getX() || b2.getMinX() + c.getX() > b1.getMaxX())
             return false;
 
         // one on top of the other
-        if (b1.getMinY() > b2.getMaxY() + c.getCentroidY() || b2.getMinY() + c.getCentroidY() > b1.getMaxY())
+        if (b1.getMinY() > b2.getMaxY() + c.getY() || b2.getMinY() + c.getY() > b1.getMaxY())
             return false;
 
         return true;
