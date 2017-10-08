@@ -2,10 +2,25 @@ package geometry;
 
 import org.ejml.simple.SimpleMatrix;
 
+
 public class Robot extends PolygonObject {
     public Robot (double[] points) {
         super(points);
     }
+
+    public Robot translate (double dx, double dy) {
+        double[] points = new double[vectors.size() * 2];
+
+        // translate all points
+        int j = 0;
+        for (int i = 0; i < vectors.size(); i++) {
+            SimpleMatrix p = vectors.get(i);
+            points[j++] = p.get(0, 0) + dx;
+            points[j++] = p.get(1, 0) + dy;
+        }
+        
+        return new Robot(points);
+    } 
 
     public Robot rotate (double angle) {
         double sinAngle = Math.sin(angle);
@@ -28,18 +43,15 @@ public class Robot extends PolygonObject {
         return new Robot(points);
     }    
 
+
+    public Robot getWorldRobot (Configuration config) {
+        return this.rotate(config.getAngle()).translate(config.getX(), config.getY());
+    }
+
+
     public Double[] getPointArray(Configuration config) {
-        // rotate the robot based on the angle in the configuration
-        Robot rotatedRobot = rotate(config.getAngle());
-        Double[] res = rotatedRobot.getPointArray();
-
-        double cx = config.getX(), cy = config.getY();
-
-        for (int i = 0; i < res.length; i++) {
-            if (i % 2 == 0) res[i] += cx;
-            else res[i] += cy;
-        }        
-
-        return res;
+        // rotate and translate the robot based on the configuration
+        Robot finalRobot = getWorldRobot(config);
+        return finalRobot.getPointArray();
     }
 }

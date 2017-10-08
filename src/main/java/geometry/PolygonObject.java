@@ -1,6 +1,7 @@
 package geometry;
 
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
 import org.ejml.simple.SimpleMatrix;
 
 import static global.Constants.DEBUG;
@@ -51,6 +52,30 @@ public class PolygonObject {
 
         for (int i = 1; i < res.length; i += 2) {
             res[i] = screenHeight - res[i];
+        }
+
+        return res;
+    }
+
+
+    /**
+     * Return the list of triangles that make this polygon object.
+     */
+    public List<PolygonObject> getTriangles () {
+        List<PolygonObject> res = new ArrayList<>();
+
+        Double[] pointArray = getPointArray();
+        double startX = pointArray[0];
+        double startY = pointArray[1];
+
+        for (int i = 2; i < pointArray.length - 2; i += 2) {
+            PolygonObject triangle = new PolygonObject(new double[] {
+                startX, startY,
+                pointArray[i], pointArray[i+1],
+                pointArray[i+2], pointArray[i+3]
+            });
+
+            res.add(triangle);
         }
 
         return res;

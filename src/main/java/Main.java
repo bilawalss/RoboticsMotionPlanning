@@ -92,7 +92,7 @@ public class Main extends Application {
         }
 
         // debug local planner
-        if (DEBUG) {
+        if (false) {
             System.out.println("Debug local planner");
 
             Group debugRoot = new Group();
@@ -140,22 +140,12 @@ public class Main extends Application {
 
             System.out.println("Debug Robot");
             Robot r = new Robot(new double[] { -62.5, -75, 37.5, -75, 87.5, 75, -62.5, 75 });
-            Configuration c = new Configuration(412.5, 425);
+            Configuration c = new Configuration(200.0, 200.0, Math.PI / 2);
             
-            // original
-            Polygon original = new Polygon(); 
-            original.getPoints().addAll(r.getPointArray(c));
+            Polygon rPoly = new Polygon(); 
+            rPoly.getPoints().addAll(r.getPointArray(c));
+            robotRoot.getChildren().add(rPoly);
 
-            // after move and rotate
-            c = c.move(-200, -200);
-            r = r.rotate(Math.PI / 2);
-
-            Polygon afterMove = new Polygon();
-            afterMove.getPoints().addAll(r.getPointArray(c));
-
-            robotRoot.getChildren().add(original);
-            robotRoot.getChildren().add(afterMove);
-            
             robotStage.setScene(robotScene);
             robotStage.show();
 

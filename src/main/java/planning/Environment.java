@@ -9,12 +9,15 @@ import org.ejml.simple.SimpleMatrix;
 
 
 public class Environment {
-    private Robot robot;
-    private List<PolygonObject> obstacles;
     private double worldWidth, worldHeight;
 
-    private List<PolygonObject> robotTriangles;
+    private Robot robot;
+
+    /* the list of obstacles */
+    private List<PolygonObject> obstacles;
+    /* the list of triangles that are extracted from the obstacles */
     private List<PolygonObject> obstacleTriangles;
+
 
     public Environment(Robot robot, List<PolygonObject> obstacles, double worldWidth,
             double worldHeight) {
@@ -22,6 +25,13 @@ public class Environment {
         this.obstacles = obstacles;
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
+
+        // construct the list of triangles for obstacles
+        obstacleTriangles = new ArrayList<>();
+        for (PolygonObject o: obstacles) {
+            List<PolygonObject> triangles = o.getTriangles();
+            obstacleTriangles.addAll(triangles);    
+        }
 	}
 
 
@@ -29,83 +39,63 @@ public class Environment {
         return worldWidth;
     }
 
+
     public double getWorldHeight() {
         return worldHeight;
     }
+
 
     public Double[] getRobotPointArray (Configuration c) {
        return robot.getPointArray(c);     
     }
 
-    private void triangleBuilder(Configuration c) {
-        Double[] robotArray = robot.getPointArray(c);
-        double startX = robotArray[0];
-        double startY = robotArray[1];
-        robotTriangles = new ArrayList<>();
-        for (int i = 2; i < robotArray.length-2; i+=2) {
-
-            robotTriangles.add(new PolygonObject(new double[] {startX, startY,
-                                                               robotArray[i], robotArray[i+1], 
-                                                               robotArray[i+2], robotArray[i+3]}));
-        }
-        obstacleTriangles = new ArrayList<>();
-
-        for (PolygonObject obstacle : obstacles) {
-            Double[] obstacleArray = obstacle.getPointArray();
-            double obstacleStartX = obstacleArray[0];
-            double obstacleStartY = obstacleArray[1];
-
-            for (int i = 2; i < obstacleArray.length-2; i+=2) {
-                obstacleTriangles.add(new PolygonObject(new double[] {obstacleStartX, obstacleStartY,
-                                                               obstacleArray[i], obstacleArray[i+1], 
-                                                               obstacleArray[i+2], obstacleArray[i+3]}));
-                
-            }
-        }
-    }
 
     public boolean checkCollision(Configuration c) {
-        
         Double [] robotArray = robot.getPointArray(c);
-        double minX = Double.MAX_VALUE;
-        double minY = Double.MAX_VALUE;
-        double maxX = Double.MIN_VALUE;
-        double maxY = Double.MIN_VALUE;
-        for (int i = 0; i < robotArray.length/2; i+=2) {
+
+        double minX = Double.POSITIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+
+        for (int i = 0; i < robotArray.length / 2; i += 2) {
             minX = Math.min(minX, robotArray[i]);
             maxX = Math.max(maxX, robotArray[i]);
             minY = Math.min(minY, robotArray[i+1]);
             maxY = Math.max(maxY, robotArray[i+1]);
         }
-
-        if (minX <= 0 || maxX >= getWorldWidth() || minY <= 0 || maxY >= getWorldHeight()) 
+        
+        // check if the robot is outside the workspace 
+        if (minX < 0 || maxX >= getWorldWidth() || minY < 0 || maxY >= getWorldHeight()) 
             return true;
 
+        List<PolygonObject> robotTriangles = robot.getWorldRobot(c).getTriangles(); 
 
-        triangleBuilder(c);
-        for (PolygonObject robot : robotTriangles) {
-            for (PolygonObject obstacle : obstacleTriangles) {
-                if (isPolygonsIntersecting(robot, obstacle)) {
-                    
+        // check if any triangle of the robot collides with a triangle of any obstacle
+        for (PolygonObject robotT: robotTriangles) {
+            for (PolygonObject obstacleT: obstacleTriangles) {
+                if (doPolygonsIntersect(robotT, obstacleT))
                     return true;
-                }
-            }
+            }    
         }
 
         return false;
     }
     
-    private boolean isPolygonsIntersecting(PolygonObject a, PolygonObject b) {
 
+    /**
+     * Check collision between 2 convex polygons using Separating Axis Theorem (
+     * code adapted from https://stackoverflow.com/a/27309428)
+     */
+    private boolean doPolygonsIntersect(PolygonObject a, PolygonObject b) {
         // for 2 polygons, a is robot, b is obstacle
-        for (int x=0; x<2; x++) {
-
+        for (int x = 0; x < 2; x++) {
             // if x = 0, polygon is a
             PolygonObject polygon = (x==0) ? a : b;
 
             // repeat for all points of the polygon
             Double [] polygonArray = polygon.getPointArray();
-            for (int i1=0; i1<polygonArray.length/2; i1+=2) {
+            for (int i1 = 0; i1 < polygonArray.length / 2; i1 += 2) {
 
                 // get another point of the polygon
                 int i2 = (i1 + 2) % polygon.getPointArray().length;
@@ -124,8 +114,7 @@ public class Environment {
                 double maxA = Double.NEGATIVE_INFINITY;
 
                 Double [] aArray = a.getPointArray();
-                for (int i=0; i<aArray.length/2; i+=2) {
-                // for (Double p : a.getPointArray()) {
+                for (int i = 0; i < aArray.length / 2; i += 2) {
                     double projected = normalX * aArray[i] + normalY * aArray[i+1];
 
                     if (projected < minA)
@@ -138,7 +127,7 @@ public class Environment {
                 double maxB = Double.NEGATIVE_INFINITY;
 
                 Double [] bArray = b.getPointArray();
-                for (int j=0; j<bArray.length/2; j+=2) {
+                for (int j = 0; j < bArray.length / 2; j += 2) {
                     double projected = normalX * bArray[j] + normalY * bArray[j+1];
 
                     if (projected < minB)
