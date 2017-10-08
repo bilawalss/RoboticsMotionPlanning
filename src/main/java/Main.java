@@ -109,21 +109,23 @@ public class Main extends Application {
             Robot r = new Robot(new double[] { -10, 10, 10, 10, 10, -10, -10, -10 });
             
             Environment env = new Environment(r, obstacles, 600, 400);
+
             LocalPlanner localPlanner = new LocalPlanner();
 
-            Configuration start = new Configuration(100, 100, 0);
-            Configuration end = new Configuration(200, 200, 0);
+            Configuration start = new Configuration(200, 200, 0);
+            Configuration end = new Configuration(500, 500, 0);
             List<Configuration> configs = localPlanner.getPath(env, start, end, 10.0);
 
             // draw all the configurations
             if (configs != null) {
+
                 for (Configuration c: configs) {
                     Polygon poly = new Polygon();
                     poly.getPoints().addAll(env.getRobotPointArray(c));
                     debugRoot.getChildren().add(poly);                 
                 }
             }
-
+             
             debugStage.setScene(debugScene);
             debugStage.show();
 

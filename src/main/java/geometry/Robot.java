@@ -28,11 +28,6 @@ public class Robot extends PolygonObject {
         return new Robot(points);
     }    
 
-    public BoundingBox getBoundingBox(Configuration config) {
-        Robot rotatedRobot = rotate(config.getAngle());
-        return rotatedRobot.getBoundingBox();
-    }
-
     public Double[] getPointArray(Configuration config) {
         // rotate the robot based on the angle in the configuration
         Robot rotatedRobot = rotate(config.getAngle());

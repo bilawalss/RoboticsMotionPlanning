@@ -11,8 +11,6 @@ import static global.Constants.DEBUG;
 public class PolygonObject {
     // store a list of 2x1 matrices representing coordinate vectors
     protected List<SimpleMatrix> vectors;
-    // the rectangular bounding box around this polygon 
-    protected BoundingBox bbox;
 
     /**
      * Create a PolygonObject from an array of points.
@@ -26,14 +24,7 @@ public class PolygonObject {
         for (int i = 0; i < points.length; i+= 2) {
             SimpleMatrix p = new SimpleMatrix(2, 1, true, new double[] { points[i], points[i+1] });
             vectors.add(p);
-        }
-
-        // create bbox
-        bbox = new BoundingBox(points);  
-    }
-
-    public BoundingBox getBoundingBox() {
-        return bbox;
+        } 
     }
 
     /**
