@@ -1,3 +1,5 @@
+package planning;
+
 import geometry.*;
 
 import java.util.ArrayList;
@@ -7,14 +9,14 @@ import org.ejml.simple.SimpleMatrix;
 
 
 public class Environment {
-	private Robot robot;
-	private List<PolygonObject> obstacles;
+    private Robot robot;
+    private List<PolygonObject> obstacles;
     private double worldWidth, worldHeight;
 
-	public Environment(Robot robot, List<PolygonObject> obstacles, double worldWidth,
+    public Environment(Robot robot, List<PolygonObject> obstacles, double worldWidth,
             double worldHeight) {
-		this.robot = robot;
-		this.obstacles = obstacles;
+        this.robot = robot;
+        this.obstacles = obstacles;
         this.worldWidth = worldWidth;
         this.worldHeight = worldHeight;
 	}

@@ -19,7 +19,13 @@ import geometry.PolygonObject;
 import geometry.Robot;
 import geometry.Configuration;
 
+import planning.Sampler;
+import planning.Environment;
+import planning.MotionPlanner;
+import planning.LocalPlanner;
+
 import static global.Constants.DEBUG;
+
 
 /**
  * A simulator for the class Robotics Motion Planning.
@@ -85,9 +91,9 @@ public class Main extends Application {
             polygons.getChildren().add(poly); 
         }
 
-        // debug motion planner  
+        // debug local planner
         if (DEBUG) {
-            System.out.println("Debug motion planner");
+            System.out.println("Debug local planner");
 
             Group debugRoot = new Group();
             Stage debugStage = new Stage();
@@ -100,45 +106,24 @@ public class Main extends Application {
                 debugRoot.getChildren().add(obstaclePolygon);
             }
 
-            Robot r = new Robot(new double[] { -62.5, -75, 37.5, -75, 87.5, 75, -62.5, 75 });
+            Robot r = new Robot(new double[] { -10, 10, 10, 10, 10, -10, -10, -10 });
             
-            // create motion planner
             Environment env = new Environment(r, obstacles, 600, 400);
-            Sampler sampler = new Sampler();
+            LocalPlanner localPlanner = new LocalPlanner();
 
-            MotionPlanner planner = MotionPlanner.getInstance();
-            planner.setEnvironment(env);
-            planner.setSampler(sampler);
+            Configuration start = new Configuration(100, 100, 0);
+            Configuration end = new Configuration(200, 200, 0);
+            List<Configuration> configs = localPlanner.getPath(env, start, end, 10.0);
 
-            Polygon original = new Polygon();
-
-            // add a button
-            Button btn = new Button();
-            btn.setText("sampling");
-            btn.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    planner.sampling();
-                    original.getPoints().clear();
-                    original.getPoints().addAll(planner.getRobotPointArray());
-                    original.setFill(Color.BLUE);
-
-                    if (planner.checkCollision()) {
-                        original.setFill(Color.RED);
-                    }
+            // draw all the configurations
+            if (configs != null) {
+                for (Configuration c: configs) {
+                    Polygon poly = new Polygon();
+                    poly.getPoints().addAll(env.getRobotPointArray(c));
+                    debugRoot.getChildren().add(poly);                 
                 }
-            }); 
-
-            planner.sampling();
-            original.getPoints().addAll(planner.getRobotPointArray());
-            original.setFill(Color.BLUE);
-
-            if (planner.checkCollision()) {
-                original.setFill(Color.RED);
             }
 
-            debugRoot.getChildren().add(original);
-            debugRoot.getChildren().add(btn);
             debugStage.setScene(debugScene);
             debugStage.show();
 

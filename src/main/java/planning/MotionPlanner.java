@@ -1,3 +1,5 @@
+package planning;
+
 import geometry.Configuration;
 
 public class MotionPlanner {
@@ -6,8 +8,8 @@ public class MotionPlanner {
 
     private Environment env;
     private Sampler sampler;
-    private Configuration currentConfig;
-
+    private LocalPlanner localPlanner;
+    
     private MotionPlanner() {
     }
 
@@ -19,21 +21,13 @@ public class MotionPlanner {
         this.sampler = sampler;
     }
 
+    public void setLocalPlanner(LocalPlanner localPlanner) {
+        this.localPlanner = localPlanner;
+    }
+
     public static MotionPlanner getInstance() {
         if (instance == null)
             instance = new MotionPlanner();
         return instance;
-    }
-
-    public void sampling () {
-        currentConfig = sampler.getSamplePoint(env.getWorldWidth(), env.getWorldHeight());
-    }
-
-    public boolean checkCollision() {
-        return env.checkCollision(currentConfig);
-    }
-
-    public Double[] getRobotPointArray() {
-        return env.getRobotPointArray(currentConfig); 
     }
 }
