@@ -58,15 +58,18 @@ public class Environment {
         double maxX = Double.NEGATIVE_INFINITY;
         double maxY = Double.NEGATIVE_INFINITY;
 
-        for (int i = 0; i < robotArray.length / 2; i += 2) {
+        for (int i = 0; i < robotArray.length; i += 2) {
             minX = Math.min(minX, robotArray[i]);
             maxX = Math.max(maxX, robotArray[i]);
             minY = Math.min(minY, robotArray[i+1]);
             maxY = Math.max(maxY, robotArray[i+1]);
         }
+
+        System.out.println("Mins and Maxs: "+minX+" "+maxX+" "+minY+" "+maxY);
         
         // check if the robot is outside the workspace 
         if (minX < 0 || maxX >= getWorldWidth() || minY < 0 || maxY >= getWorldHeight()) 
+            
             return true;
 
         List<PolygonObject> robotTriangles = robot.getWorldRobot(c).getTriangles(); 
@@ -95,7 +98,7 @@ public class Environment {
 
             // repeat for all points of the polygon
             Double [] polygonArray = polygon.getPointArray();
-            for (int i1 = 0; i1 < polygonArray.length / 2; i1 += 2) {
+            for (int i1 = 0; i1 < polygonArray.length; i1 += 2) {
 
                 // get another point of the polygon
                 int i2 = (i1 + 2) % polygon.getPointArray().length;
@@ -114,7 +117,7 @@ public class Environment {
                 double maxA = Double.NEGATIVE_INFINITY;
 
                 Double [] aArray = a.getPointArray();
-                for (int i = 0; i < aArray.length / 2; i += 2) {
+                for (int i = 0; i < aArray.length; i += 2) {
                     double projected = normalX * aArray[i] + normalY * aArray[i+1];
 
                     if (projected < minA)
@@ -127,7 +130,7 @@ public class Environment {
                 double maxB = Double.NEGATIVE_INFINITY;
 
                 Double [] bArray = b.getPointArray();
-                for (int j = 0; j < bArray.length / 2; j += 2) {
+                for (int j = 0; j < bArray.length; j += 2) {
                     double projected = normalX * bArray[j] + normalY * bArray[j+1];
 
                     if (projected < minB)

@@ -91,6 +91,68 @@ public class Main extends Application {
             polygons.getChildren().add(poly); 
         }
 
+        if (DEBUG) {
+           
+             System.out.println("Debug motion planner");
+ 
+             Group debugRoot = new Group();
+             Stage debugStage = new Stage();
+             Scene debugScene = new Scene(debugRoot, 600, 600);
+  
+
+             
+              for (PolygonObject obstacle : obstacles ) {
+                  Polygon obstaclePolygon = new Polygon();
+                  obstaclePolygon.getPoints().addAll(obstacle.getPointArray());
+                 
+                 debugRoot.getChildren().add(obstaclePolygon);
+              }
+  
+            Robot r = new Robot(new double[] { -62.5, -75, 37.5, -75, 87.5, 75, -62.5, 75 });
+            
+              
+             
+             // create motion planner
+             Environment env = new Environment(r, obstacles, 600, 400);
+             Sampler sampler = new Sampler();
+ 
+             MotionPlanner planner = MotionPlanner.getInstance();
+             planner.setEnvironment(env);
+             planner.setSampler(sampler);
+ 
+             Polygon original = new Polygon();
+ 
+             // add a button
+             Button btn = new Button();
+             btn.setText("sampling");
+             btn.setOnAction(new EventHandler<ActionEvent>() {
+                 @Override
+                 public void handle(ActionEvent event) {
+                     Configuration c = sampler.getSamplePoint(600, 400);
+                     original.getPoints().clear();
+                     original.getPoints().addAll(r.getPointArray(c));
+                     original.setFill(Color.BLUE);
+                     for (double rp : r.getPointArray(c)) {
+                        System.out.print(rp+" ");
+                     }
+                     System.out.println("Gap here");
+
+                     if (env.checkCollision(c)) {
+                         original.setFill(Color.RED);
+                     }
+                 }
+             }); 
+ 
+             
+ 
+             debugRoot.getChildren().add(original);
+             debugRoot.getChildren().add(btn);
+             debugStage.setScene(debugScene);
+             debugStage.show();
+  
+              return;
+        }
+
         // debug local planner
         if (false) {
             System.out.println("Debug local planner");
