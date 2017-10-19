@@ -3,11 +3,20 @@ package geometry;
 import org.ejml.simple.SimpleMatrix;
 
 
+/** Used for create robot. */
 public class Robot extends PolygonObject {
+
+    /** Creates a robot from an array of points. */
     public Robot (double[] points) {
         super(points);
     }
 
+    /**
+     * Returns a new robot that is translated from the current robot.
+     * @param dx the change in x coordinate
+     * @param dy the change in y coordinate
+     * @return a new robot that is translated from the current robot
+     */
     public Robot translate (double dx, double dy) {
         double[] points = new double[vectors.size() * 2];
 
@@ -21,6 +30,7 @@ public class Robot extends PolygonObject {
         
         return new Robot(points);
     } 
+
 
     public Robot rotate (double angle) {
         double sinAngle = Math.sin(angle);

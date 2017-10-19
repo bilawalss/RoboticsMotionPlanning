@@ -1,6 +1,7 @@
 package planning;
 
 import geometry.*;
+import static global.Constants.DEBUG;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,14 +9,18 @@ import java.util.List;
 import org.ejml.simple.SimpleMatrix;
 
 
+/** 
+ * Contains information about the workspace, which includes world dimensions, robot, 
+ * and obstacles.
+ */
 public class Environment {
+    // world dimensions
     private double worldWidth, worldHeight;
-
+    // robot
     private Robot robot;
-
-    /* the list of obstacles */
+    // the list of obstacles as polygon objects
     private List<PolygonObject> obstacles;
-    /* the list of triangles that are extracted from the obstacles */
+    // the list of triangles that are extracted from the obstacles
     private List<PolygonObject> obstacleTriangles;
 
 
@@ -44,12 +49,14 @@ public class Environment {
         return worldHeight;
     }
 
-
+    
+    /** Returns the world coordinates of the robot given a configuration point. */
     public Double[] getRobotPointArray (Configuration c) {
        return robot.getPointArray(c);     
     }
 
-
+    
+    /** Checks if the robot collides with any obstacle given a configuration point. */
     public boolean checkCollision(Configuration c) {
         Double [] robotArray = robot.getPointArray(c);
 
@@ -64,12 +71,9 @@ public class Environment {
             minY = Math.min(minY, robotArray[i+1]);
             maxY = Math.max(maxY, robotArray[i+1]);
         }
-
-        System.out.println("Mins and Maxs: "+minX+" "+maxX+" "+minY+" "+maxY);
         
         // check if the robot is outside the workspace 
         if (minX < 0 || maxX >= getWorldWidth() || minY < 0 || maxY >= getWorldHeight()) 
-            
             return true;
 
         List<PolygonObject> robotTriangles = robot.getWorldRobot(c).getTriangles(); 
@@ -94,7 +98,7 @@ public class Environment {
         // for 2 polygons, a is robot, b is obstacle
         for (int x = 0; x < 2; x++) {
             // if x = 0, polygon is a
-            PolygonObject polygon = (x==0) ? a : b;
+            PolygonObject polygon = (x == 0) ? a : b;
 
             // repeat for all points of the polygon
             Double [] polygonArray = polygon.getPointArray();

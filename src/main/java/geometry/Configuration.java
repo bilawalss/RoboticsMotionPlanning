@@ -3,8 +3,13 @@ package geometry;
 import org.ejml.simple.SimpleMatrix;
 
 
+/**
+ * Represent the configuration of a robot in the configuration space.
+ */
 public class Configuration {
+    // x and y coordinates representing position vector.
     private double x, y;
+    // the angle between the position vector and x-axis (from -PI to PI).
     private double angle;
 
     public Configuration (double x, double y, double angle) {
@@ -41,14 +46,9 @@ public class Configuration {
         y = val;
     }
 
-    public Configuration move(double dx, double dy) {
-        return new Configuration(x + dx, x + dy);
-    }
-
-    public static double distance(Configuration c1, Configuration c2) {
-        double x1 = c1.getX(), y1 = c1.getY();
-        double x2 = c2.getX(), y2 = c2.getY();
-
-        return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+    /** Returns a 3x1 vector of the form (x, y, angle). */
+    public SimpleMatrix toVector() {
+        double[][] vector = {{x}, {y}, {angle}};
+        return new SimpleMatrix(vector);
     }
 }

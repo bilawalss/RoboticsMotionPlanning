@@ -6,8 +6,9 @@ import org.ejml.simple.SimpleMatrix;
 
 import static global.Constants.DEBUG;
 
+
 /**
- * This class is used to create a polygon object. 
+ * Used to create a polygon object. 
  */ 
 public class PolygonObject {
     // store a list of 2x1 matrices representing coordinate vectors
@@ -16,7 +17,7 @@ public class PolygonObject {
     /**
      * Create a PolygonObject from an array of points.
      * @param points an array of points, where the even indexes contain x-coordinates
-     *  and odd indexes contain y-coordinates
+     * and odd indexes contain y-coordinates
      */ 
     public PolygonObject (double[] points) {
         vectors = new ArrayList<>();

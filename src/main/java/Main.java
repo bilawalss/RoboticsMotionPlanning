@@ -91,7 +91,7 @@ public class Main extends Application {
             polygons.getChildren().add(poly); 
         }
 
-        if (DEBUG) {
+        if (false) {
            
              System.out.println("Debug motion planner");
  
@@ -154,34 +154,35 @@ public class Main extends Application {
         }
 
         // debug local planner
-        if (false) {
+        if (DEBUG) {
             System.out.println("Debug local planner");
 
             Group debugRoot = new Group();
             Stage debugStage = new Stage();
             Scene debugScene = new Scene(debugRoot, 600, 600);
 
-            
+            // draw obstacles
+            /*
             for (PolygonObject obstacle : obstacles ) {
                 Polygon obstaclePolygon = new Polygon();
                 obstaclePolygon.getPoints().addAll(obstacle.getPointArray());
                 debugRoot.getChildren().add(obstaclePolygon);
-            }
+            } */
 
+            // set up robot, environment and local planner
             Robot r = new Robot(new double[] { -10, 10, 10, 10, 10, -10, -10, -10 });
-            
             Environment env = new Environment(r, obstacles, 600, 400);
-
             LocalPlanner localPlanner = new LocalPlanner();
 
+            // initialize configurations
             Configuration start = new Configuration(200, 200, 0);
-            Configuration end = new Configuration(500, 500, 0);
-            List<Configuration> configs = localPlanner.getPath(env, start, end, 10.0);
+            Configuration end = new Configuration(300, 300, Math.PI / 3.0);
+            List<Configuration> configs = localPlanner.getPath(env, start, end, 10);
 
             // draw all the configurations
             if (configs != null) {
-
                 for (Configuration c: configs) {
+                    System.out.println("(" + c.getX() + "," + c.getY() + "," + c.getAngle() + ")");
                     Polygon poly = new Polygon();
                     poly.getPoints().addAll(env.getRobotPointArray(c));
                     debugRoot.getChildren().add(poly);                 
