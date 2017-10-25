@@ -16,7 +16,7 @@ public class LocalPlanner {
      * @param env environment (workspace)
      * @param start starting configuration
      * @param end ending configuration
-     * @param delta step size
+     * @param delta resolution distance 
      * @return a List containing a set of configurations representing a collision-free path or 
      * null if no such path exists
      */
@@ -31,7 +31,7 @@ public class LocalPlanner {
 
         // compute the step vector
         SimpleMatrix diff = end.toVector().minus(start.toVector());
-        int numSteps = (int)Math.floor(diff.normF() / delta);
+        int numSteps = (int)Math.ceil(diff.normF() / delta);
         SimpleMatrix step = diff.divide(numSteps);
 
         // go from start to end configuration step by step

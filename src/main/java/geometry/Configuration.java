@@ -51,4 +51,10 @@ public class Configuration {
         double[][] vector = {{x}, {y}, {angle}};
         return new SimpleMatrix(vector);
     }
+
+    public double distanceTo(Configuration other) {
+        SimpleMatrix v1 = this.toVector();
+        SimpleMatrix v2 = other.toVector();
+        return v1.minus(v2).normF();
+    }
 }

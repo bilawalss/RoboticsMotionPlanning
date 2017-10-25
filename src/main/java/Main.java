@@ -12,12 +12,15 @@ import javafx.scene.Scene;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 
 import org.ejml.simple.SimpleMatrix;
 
 import geometry.PolygonObject;
 import geometry.Robot;
 import geometry.Configuration;
+import geometry.Graph;
 
 import planning.Sampler;
 import planning.Environment;
@@ -91,16 +94,68 @@ public class Main extends Application {
             polygons.getChildren().add(poly); 
         }
 
-        if (false) {
+        if (DEBUG) {
+            // test graph
+            Group debugRoot = new Group();
+            Stage debugStage = new Stage();
+            Scene debugScene = new Scene(debugRoot, 600, 600);
+
+            Configuration a = new Configuration(100, 100);
+            Configuration b = new Configuration(200, 200);
+            Configuration c = new Configuration(250, 300);
+            Configuration d = new Configuration(350, 100);
+
+            Graph g = new Graph();
+            g.addVertex(a);
+            g.addVertex(b);
+            g.addVertex(c);
+            g.addVertex(d);
+
+            g.addEdge(0, 3);
+            g.addEdge(0, 1);
+            g.addEdge(2, 3);
+            g.addEdge(1, 3);
+            
+            // draw vertices
+            for (int i = 0; i < g.size(); i++) {
+                Configuration x = g.getVertex(i);
+                Circle circle = new Circle();
+                circle.setCenterX(x.getX());
+                circle.setCenterY(x.getY());
+                circle.setRadius(10.0);
+                debugRoot.getChildren().add(circle);
+            }
+
+            // draw shortest path
+            List<Integer> path = g.shortestPath(0, 2);
+            System.out.println(path);
+            for (int i = 0; i < path.size() - 1; i++) {
+                Configuration u = g.getVertex(path.get(i));
+                Configuration v = g.getVertex(path.get(i+1));
+
+                Line line = new Line();
+                line.setStartX(u.getX());
+                line.setStartY(u.getY());
+                line.setEndX(v.getX());
+                line.setEndY(v.getY());
+
+                debugRoot.getChildren().add(line);
+            }
+            
+            debugStage.setScene(debugScene);
+            debugStage.show();
+            return;
+        }
+
+
+        if (DEBUG) {
            
              System.out.println("Debug motion planner");
  
              Group debugRoot = new Group();
              Stage debugStage = new Stage();
              Scene debugScene = new Scene(debugRoot, 600, 600);
-  
 
-             
               for (PolygonObject obstacle : obstacles ) {
                   Polygon obstaclePolygon = new Polygon();
                   obstaclePolygon.getPoints().addAll(obstacle.getPointArray());
@@ -191,26 +246,6 @@ public class Main extends Application {
              
             debugStage.setScene(debugScene);
             debugStage.show();
-
-            return;
-        }
-
-        // test Robot 
-        if (DEBUG) {
-            Group robotRoot = new Group();
-            Stage robotStage = new Stage();
-            Scene robotScene = new Scene(robotRoot, 600, 600);
-
-            System.out.println("Debug Robot");
-            Robot r = new Robot(new double[] { -62.5, -75, 37.5, -75, 87.5, 75, -62.5, 75 });
-            Configuration c = new Configuration(200.0, 200.0, Math.PI / 2);
-            
-            Polygon rPoly = new Polygon(); 
-            rPoly.getPoints().addAll(r.getPointArray(c));
-            robotRoot.getChildren().add(rPoly);
-
-            robotStage.setScene(robotScene);
-            robotStage.show();
 
             return;
         }
