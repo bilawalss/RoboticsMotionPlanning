@@ -102,7 +102,7 @@ public class Main extends Application {
 
             Configuration a = new Configuration(100, 100);
             Configuration b = new Configuration(200, 200);
-            Configuration c = new Configuration(250, 300);
+            Configuration c = new Configuration(260, 300);
             Configuration d = new Configuration(350, 100);
 
             Graph g = new Graph();
@@ -111,11 +111,11 @@ public class Main extends Application {
             g.addVertex(c);
             g.addVertex(d);
 
-            g.addEdge(0, 3);
             g.addEdge(0, 1);
+            g.addEdge(0, 2);
             g.addEdge(2, 3);
             g.addEdge(1, 3);
-            
+
             // draw vertices
             for (int i = 0; i < g.size(); i++) {
                 Configuration x = g.getVertex(i);
@@ -126,9 +126,9 @@ public class Main extends Application {
                 debugRoot.getChildren().add(circle);
             }
 
-            // draw shortest path
-            List<Integer> path = g.shortestPath(0, 2);
-            System.out.println(path);
+            // find shortest path
+            List<Integer> path = g.shortestPath(0, 3);
+
             for (int i = 0; i < path.size() - 1; i++) {
                 Configuration u = g.getVertex(path.get(i));
                 Configuration v = g.getVertex(path.get(i+1));

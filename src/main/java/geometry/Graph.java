@@ -6,13 +6,15 @@ import java.util.PriorityQueue;
 import java.util.Arrays;
 import java.util.Collections;
 
+
+/**
+ * Used to make a graph for connecting configurations.
+ */
 public class Graph {
-    private ArrayList<Configuration> vertices;
-    private ArrayList<ArrayList<Integer>> adjList;
+    public List<Vertex> vertices;
 
     public Graph() {
         vertices = new ArrayList<>();
-        adjList = new ArrayList<>(); 
     } 
 
     public int size() {
@@ -20,136 +22,161 @@ public class Graph {
     }
 
     public int addVertex(Configuration c) {
-        vertices.add(new Configuration(c));
-        adjList.add(new ArrayList<>());
-        return vertices.size() - 1;
+        int idx = vertices.size();
+        Vertex v = new Vertex(idx, c);
+        vertices.add(v);
+        return idx;
     }
 
     public void addEdge(int i, int j) {
-        double dist = vertices.get(i).distanceTo(vertices.get(j));
-        adjList.get(i).add(j);
-        adjList.get(j).add(i);
+        vertices.get(i).addNeighbor(j);
+        vertices.get(j).addNeighbor(i); 
     }
 
     public Configuration getVertex(int i) {
-        return new Configuration(vertices.get(i));
+        return new Configuration(vertices.get(i).config);
     }
 
     public List<Integer> getNeighbors(int i) {
-        return adjList.get(i);
+        return vertices.get(i).getNeighbors();
     }
 
     public List<Integer> getKClosestVertices(int i, int k) {
-        Configuration start = vertices.get(i);
+        Vertex start = vertices.get(i);
+
         // max heap
-        PriorityQueue<Edge> pq = new PriorityQueue<>((e1, e2) -> {
-            if (e1.length< e2.length)
+        PriorityQueue<Pair> pq = new PriorityQueue<>(k, (p1, p2) -> {
+            if (p1.dist < p2.dist)
                 return 1;
-            else if (e1.length> e2.length)
+            else if (p1.dist > p2.dist)
                 return -1;
-            else return 0;
+            return 0;
         });
-        
+
+        // run through the list of all vertices, calculate their distances to
+        // the start vertex, and put them on the heap (the heap only contains
+        // the k vertices with minimum distances to the start vertex) 
         for (int j = 0; j < vertices.size(); j++) {
             if (j != i) {
-                Configuration end = vertices.get(j);
-                double dist = start.distanceTo(end);
-                Edge e = new Edge(j, dist);
+                Vertex end = vertices.get(j);
+                double dist = start.config.distanceTo(end.config);
+                Pair p = new Pair(end, dist);
 
                 if (pq.size() < k)
-                    pq.add(e);
+                    pq.add(p);
                 else {
-                    Edge maxMin = pq.peek();
-                    if (maxMin.length > dist) {
+                    Pair maxMin = pq.peek();
+                    if (maxMin.dist > dist) {
                         pq.poll();
-                        pq.add(e);
+                        pq.add(p);
                     }
                 }
             }
         }
 
+        // get the indexes of the k nearest vertices
         List<Integer> res = new ArrayList<>();
-        for (Edge e: pq) {
-            res.add(e.endPoint);
+        for (Pair p: pq) {
+            res.add(p.v.idx);
         }
 
         return res;
     }
 
-    public List<Integer> shortestPath(int i, int j) {
-        // prev list for backtracing the shortest path
+
+    public List<Integer> shortestPath(int source, int target) {
+        // min heap
+        PriorityQueue<Pair> pq = new PriorityQueue<>(vertices.size(), (p1, p2) -> {
+            if (p1.dist < p2.dist)
+                return -1;
+            else if (p1.dist > p2.dist)
+                return 1;
+            else return 0;
+        });
+
         int[] prev = new int[vertices.size()];
         Arrays.fill(prev, -1);
 
-        // priority queue for djikstra
-        PriorityQueue<Vertex> pq = new PriorityQueue<>(vertices.size(), (v1, v2) -> {
-            if (v1.dist > v2.dist)
-                return 1;
-            else if (v1.dist < v2.dist)
-                return -1;
-            return 0;
-        });
+        // map each vertex's index to the corresponding pair
+        Pair[] pairs = new Pair[vertices.size()];
 
-        Vertex[] vWithDist = new Vertex[vertices.size()];
-
-        // add all vertices to priority queue
-        for (int idx = 0; idx < vertices.size(); idx++) {
-            Vertex v;
-            if (idx == i) {
-                v = new Vertex(idx, 0.0);
-            } else {
-                v = new Vertex(idx, Double.POSITIVE_INFINITY);
-            }
-            vWithDist[idx] = v;
-            pq.add(v);
+        // Dijkstra for finding the shortest path
+        for (int i = 0; i < vertices.size(); i++) {
+            Pair p = new Pair(vertices.get(i), Double.POSITIVE_INFINITY);
+            if (i == source)
+                p.dist = 0.0;
+            pairs[i] = p;
+            pq.add(p);
         }
 
-        while(!pq.isEmpty()) {
-            Vertex u = pq.poll();
+        while (!pq.isEmpty()) {
+            Pair p = pq.poll();
+            Vertex v = p.v;
+            double dist = p.dist;
 
-            // reach the end point
-            if (u.idx == j)
+            // find the target
+            if (v.idx == target)
                 break;
 
-            // consider every other neighbor
-            ArrayList<Integer> neighbors = adjList.get(u.idx);
-            for (int nIdx: neighbors) {
-
+            // update all neighbors' distances
+            for (int nIdx: v.neighbors) {
+                Pair nP = pairs[nIdx];
+                double edgeLength = v.config.distanceTo(nP.v.config);
+                // update the heap if get smaller distance
+                if (nP.dist > dist + edgeLength) {
+                    pq.remove(nP);
+                    nP.dist = dist + edgeLength;
+                    pq.add(nP);
+                    prev[nIdx] = v.idx;
+                }
             }
         }
-
-        // backtracing
+        
+        // backtracing to get the shortest path
         List<Integer> res = new ArrayList<>();
-        int current = j;
+
+        int current = target;
         while (current != -1) {
             res.add(current);
-            current = prev[current];        
+            current = prev[current];         
         }
+
         Collections.reverse(res);
         return res;
     }
 
-    private class Vertex {
-        int idx;
+
+    // (vertex, distance to start) pair
+    private class Pair {
+        Vertex v;
         double dist;
-        public Vertex(int idx, double dist) {
-            this.idx = idx;
+        Pair(Vertex v, double dist) {
+            this.v = v;
             this.dist = dist;
         }
     }
 
-    private class Edge {
-        int endPoint;
-        double length;
 
-        public Edge(int start, int end) {
-            this.endPoint = end;
-            this.length = vertices.get(start).distanceTo(vertices.get(end));
+    private class Vertex {
+        // the index of this vertex in the list of vertices 
+        int idx;
+        // the indexes of this vertex's neighbors
+        List<Integer> neighbors;
+        // the configuration at this vertex
+        Configuration config;
+        
+        Vertex(int idx, Configuration c) {
+            this.idx = idx;
+            this.neighbors = new ArrayList<>();
+            this.config = new Configuration(c);
         }
 
-        public Edge(int end, double dist) {
-            this.endPoint = end;
-            this.length = dist;
+        void addNeighbor(int neighborIdx) {
+            neighbors.add(neighborIdx); 
+        }
+
+        List<Integer> getNeighbors() {
+            return new ArrayList<>(neighbors);
         }
     }
 }
