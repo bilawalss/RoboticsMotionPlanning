@@ -95,6 +95,147 @@ public class Main extends Application {
         }
 
         if (DEBUG) {
+            // construct PRM planner
+            Group prmRoot = new Group();
+            Stage prmStage = new Stage();
+            Scene prmScene = new Scene(prmRoot, 600, 400);
+
+            for (PolygonObject obstacle : obstacles ) {
+                  Polygon obstaclePolygon = new Polygon();
+                  obstaclePolygon.getPoints().addAll(obstacle.getPointArray());
+                 
+                 prmRoot.getChildren().add(obstaclePolygon);
+              }
+
+            Polygon original = new Polygon();
+            Robot r = new Robot(new double[] { -10, 0, 0, 10, 10, 0, 0, -10 });
+            original.setFill(Color.BLUE);
+
+            // create motion planner
+             Environment env = new Environment(r, obstacles, 600, 400);
+             Sampler sampler = new Sampler();
+ 
+             MotionPlanner planner = MotionPlanner.getInstance();
+             planner.setEnvironment(env);
+             planner.setSampler(sampler);
+ 
+             // add a button
+             
+             int size = 0;
+             Graph g = new Graph();
+             for (int i = 0; i < 10; i++) {
+                 Configuration c = sampler.getSamplePoint(600, 400);
+                 if (!env.checkCollision(c)) {
+                    size++;
+                    g.addVertex(c);
+                    Circle circle = new Circle();
+                    circle.setCenterX(c.getX());
+                    circle.setCenterY(c.getY());
+                    circle.setRadius(10.0);
+                    circle.setFill(Color.BLUE);
+                    prmRoot.getChildren().add(circle);
+                 }
+             }
+             
+            LocalPlanner localPlanner = new LocalPlanner();
+
+            // initialize configurations
+            for (int i = 0; i < size; i++) {
+                // Closest vertices to the 5 closest ones.
+                List<Integer> neighbors = g.getKClosestVertices(i, 5);
+
+                // if the local planner does not have any obtacles between the object, add the
+                // object to the graph
+                for (int neighbor : neighbors) {
+                    if (localPlanner.getPath(env, g.getVertex(i), g.getVertex(neighbor), 10) != null) {
+                        g.addEdge(i, neighbor);
+                        Line line = new Line();
+                        line.setStartX(g.getVertex(i).getX());
+                        line.setStartY(g.getVertex(i).getY());
+                        line.setEndX(g.getVertex(neighbor).getX());
+                        line.setEndY(g.getVertex(neighbor).getY());
+
+                        line.setStroke(Color.BLUE);
+                        prmRoot.getChildren().add(line);
+                        
+
+                    }
+                }
+            }    
+
+            // start and end goal configuration
+
+             Configuration start = new Configuration(200, 120, 0.3);
+             Configuration end = new Configuration(150, 350, 1.2);
+
+            if (env.checkCollision(start)) return;
+            if (env.checkCollision(end)) return;
+
+
+            Circle circle = new Circle();
+            circle.setCenterX(start.getX());
+            circle.setCenterY(start.getY());
+            circle.setRadius(10.0);
+            circle.setFill(Color.RED);
+            prmRoot.getChildren().add(circle);
+
+            Circle circle2 = new Circle();
+            circle2.setCenterX(end.getX());
+            circle2.setCenterY(end.getY());
+            circle2.setRadius(10.0);
+            circle2.setFill(Color.PURPLE);
+            prmRoot.getChildren().add(circle2);
+
+             // add this to the graph
+
+             int startPos = g.addVertex(start);
+             int endPos = g.addVertex(end);
+        
+            for (int i = 0; i < 2; i++) {
+                int pos = 0;
+                if (i == 0) pos = startPos;
+                if (i == 1) pos = endPos;
+                 List<Integer> neighbors = g.getKClosestVertices(pos, 10);
+                 for (int neighbor : neighbors) {
+                    if (localPlanner.getPath(env, g.getVertex(pos), g.getVertex(neighbor), 10) != null) {
+                        g.addEdge(pos, neighbor);
+                        Line line = new Line();
+                        line.setStartX(g.getVertex(pos).getX());
+                        line.setStartY(g.getVertex(pos).getY());
+                        line.setEndX(g.getVertex(neighbor).getX());
+                        line.setEndY(g.getVertex(neighbor).getY());
+
+                        line.setStroke(Color.RED);    
+                        prmRoot.getChildren().add(line);
+                        
+
+                    }
+                }
+            }        
+
+            List<Integer> shortestPath = g.shortestPath(startPos, endPos);
+
+            for (int i = 0; i < shortestPath.size() - 1; i++) {
+                Configuration u = g.getVertex(shortestPath.get(i));
+                Configuration v = g.getVertex(shortestPath.get(i+1));
+
+                Line line = new Line();
+                line.setStartX(u.getX());
+                line.setStartY(u.getY());
+                line.setEndX(v.getX());
+                line.setEndY(v.getY());
+                line.setStroke(Color.YELLOW);
+                prmRoot.getChildren().add(line);
+            }
+    
+             prmRoot.getChildren().add(original);
+             prmStage.setScene(prmScene);
+             prmStage.show();
+  
+              return;
+        }
+
+        if (DEBUG) {
             // test graph
             Group debugRoot = new Group();
             Stage debugStage = new Stage();
