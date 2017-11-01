@@ -26,6 +26,7 @@ import planning.Sampler;
 import planning.Environment;
 import planning.MotionPlanner;
 import planning.LocalPlanner;
+import planning.RRT;
 
 import static global.Constants.DEBUG;
 
@@ -42,6 +43,38 @@ public class Main extends Application {
         }
         System.out.println();
     }
+
+
+    private static void drawGraph(Group root, Graph g, Color color) {
+        // draw nodes
+        for (int i = 0; i < g.size(); i++) {
+            Configuration c = g.getVertex(i);
+            Circle circle = new Circle();
+            circle.setCenterX(c.getX());
+            circle.setCenterY(c.getY());
+            circle.setRadius(10.0);
+            circle.setFill(color);
+            root.getChildren().add(circle);
+        } 
+
+        // draw edges
+        for (int i = 0; i < g.size() - 1; i++) {
+            for (int j = i + 1; j < g.size(); j++) {
+                if (g.isConnected(i, j)) {
+                    Line line = new Line();
+
+                    line.setStartX(g.getVertex(i).getX());
+                    line.setStartY(g.getVertex(i).getY());
+                    line.setEndX(g.getVertex(j).getX());
+                    line.setEndY(g.getVertex(j).getY());
+
+                    line.setStroke(color);
+                    root.getChildren().add(line);
+                }
+            } 
+        }       
+    }
+
 
     @Override
     public void start(Stage stage) {
@@ -94,6 +127,47 @@ public class Main extends Application {
             polygons.getChildren().add(poly); 
         }
 
+
+        if (DEBUG) {
+            Group debugRoot = new Group();
+            Stage debugStage = new Stage();
+            Scene debugScene = new Scene(debugRoot, 600, 400);
+
+            // add obstacle
+            for (PolygonObject obstacle : obstacles ) {
+                Polygon obstaclePolygon = new Polygon();
+                obstaclePolygon.getPoints().addAll(obstacle.getPointArray());
+
+                debugRoot.getChildren().add(obstaclePolygon);
+            }
+        
+            Polygon original = new Polygon();
+            Robot r = new Robot(new double[] { -10, 0, 0, 10, 10, 0, 0, -10 });
+            original.setFill(Color.BLUE);
+
+            // create motion planner
+            Environment env = new Environment(r, obstacles, 600, 400);
+            Sampler sampler = new Sampler();
+            LocalPlanner localPlanner = new LocalPlanner();
+
+            Configuration start = new Configuration(200, 120, 0.3);
+            Configuration end = new Configuration(150, 350, 1.2);
+
+            RRT rrt = new RRT(env, sampler, localPlanner);
+            Graph g1 = rrt.build(start, 20);
+            Graph g2 = rrt.build(end, 20);
+
+            if (rrt.merge(g1, g2, 1000)) {
+                // draw the trees after merge
+                drawGraph(debugRoot, g1, Color.RED);                    
+                drawGraph(debugRoot, g2, Color.BLUE);
+            }
+
+            debugStage.setScene(debugScene);
+            debugStage.show();
+            return;
+        }
+
         if (DEBUG) {
             // construct PRM planner
             Group prmRoot = new Group();
@@ -112,20 +186,14 @@ public class Main extends Application {
             original.setFill(Color.BLUE);
 
             // create motion planner
-             Environment env = new Environment(r, obstacles, 600, 400);
-             Sampler sampler = new Sampler();
- 
-             MotionPlanner planner = MotionPlanner.getInstance();
-             planner.setEnvironment(env);
-             planner.setSampler(sampler);
- 
-             // add a button
-             
-             int size = 0;
-             Graph g = new Graph();
-             for (int i = 0; i < 10; i++) {
-                 Configuration c = sampler.getSamplePoint(600, 400);
-                 if (!env.checkCollision(c)) {
+            Environment env = new Environment(r, obstacles, 600, 400);
+            Sampler sampler = new Sampler();
+
+            int size = 0;
+            Graph g = new Graph();
+            for (int i = 0; i < 10; i++) {
+                Configuration c = sampler.getSamplePoint(600, 400);
+                if (!env.checkCollision(c)) {
                     size++;
                     g.addVertex(c);
                     Circle circle = new Circle();
@@ -134,8 +202,8 @@ public class Main extends Application {
                     circle.setRadius(10.0);
                     circle.setFill(Color.BLUE);
                     prmRoot.getChildren().add(circle);
-                 }
-             }
+                }
+            }
              
             LocalPlanner localPlanner = new LocalPlanner();
 
@@ -288,66 +356,6 @@ public class Main extends Application {
             return;
         }
 
-
-        if (DEBUG) {
-           
-             System.out.println("Debug motion planner");
- 
-             Group debugRoot = new Group();
-             Stage debugStage = new Stage();
-             Scene debugScene = new Scene(debugRoot, 600, 600);
-
-              for (PolygonObject obstacle : obstacles ) {
-                  Polygon obstaclePolygon = new Polygon();
-                  obstaclePolygon.getPoints().addAll(obstacle.getPointArray());
-                 
-                 debugRoot.getChildren().add(obstaclePolygon);
-              }
-  
-            Robot r = new Robot(new double[] { -62.5, -75, 37.5, -75, 87.5, 75, -62.5, 75 });
-            
-              
-             
-             // create motion planner
-             Environment env = new Environment(r, obstacles, 600, 400);
-             Sampler sampler = new Sampler();
- 
-             MotionPlanner planner = MotionPlanner.getInstance();
-             planner.setEnvironment(env);
-             planner.setSampler(sampler);
- 
-             Polygon original = new Polygon();
- 
-             // add a button
-             Button btn = new Button();
-             btn.setText("sampling");
-             btn.setOnAction(new EventHandler<ActionEvent>() {
-                 @Override
-                 public void handle(ActionEvent event) {
-                     Configuration c = sampler.getSamplePoint(600, 400);
-                     original.getPoints().clear();
-                     original.getPoints().addAll(r.getPointArray(c));
-                     original.setFill(Color.BLUE);
-                     for (double rp : r.getPointArray(c)) {
-                        System.out.print(rp+" ");
-                     }
-                     System.out.println("Gap here");
-
-                     if (env.checkCollision(c)) {
-                         original.setFill(Color.RED);
-                     }
-                 }
-             }); 
- 
-             
- 
-             debugRoot.getChildren().add(original);
-             debugRoot.getChildren().add(btn);
-             debugStage.setScene(debugScene);
-             debugStage.show();
-  
-              return;
-        }
 
         // debug local planner
         if (DEBUG) {

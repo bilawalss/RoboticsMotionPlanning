@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.PriorityQueue;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -33,17 +35,20 @@ public class Graph {
         vertices.get(j).addNeighbor(i); 
     }
 
+    public boolean isConnected(int i, int j) {
+        return vertices.get(i).getNeighbors().contains(j) &&
+               vertices.get(j).getNeighbors().contains(i);
+    }
+
     public Configuration getVertex(int i) {
         return new Configuration(vertices.get(i).config);
     }
 
-    public List<Integer> getNeighbors(int i) {
+    public Set<Integer> getNeighbors(int i) {
         return vertices.get(i).getNeighbors();
     }
 
-    public List<Integer> getKClosestVertices(int i, int k) {
-        Vertex start = vertices.get(i);
-
+    public List<Integer> getKClosestVertices(Configuration config, int k, int i) {
         // max heap
         PriorityQueue<Pair> pq = new PriorityQueue<>(k, (p1, p2) -> {
             if (p1.dist < p2.dist)
@@ -59,7 +64,7 @@ public class Graph {
         for (int j = 0; j < vertices.size(); j++) {
             if (j != i) {
                 Vertex end = vertices.get(j);
-                double dist = start.config.distanceTo(end.config);
+                double dist = config.distanceTo(end.config);
                 Pair p = new Pair(end, dist);
 
                 if (pq.size() < k)
@@ -81,6 +86,12 @@ public class Graph {
         }
 
         return res;
+    }
+
+
+    public List<Integer> getKClosestVertices(int i, int k) {
+        Configuration config = vertices.get(i).config;
+        return getKClosestVertices(config, k, i);
     }
 
 
@@ -147,6 +158,7 @@ public class Graph {
 
 
     // (vertex, distance to start) pair
+    // this is useful for making priority queue or using sorting algorithms
     private class Pair {
         Vertex v;
         double dist;
@@ -161,13 +173,13 @@ public class Graph {
         // the index of this vertex in the list of vertices 
         int idx;
         // the indexes of this vertex's neighbors
-        List<Integer> neighbors;
+        Set<Integer> neighbors;
         // the configuration at this vertex
         Configuration config;
         
         Vertex(int idx, Configuration c) {
             this.idx = idx;
-            this.neighbors = new ArrayList<>();
+            this.neighbors = new HashSet<>();
             this.config = new Configuration(c);
         }
 
@@ -175,8 +187,8 @@ public class Graph {
             neighbors.add(neighborIdx); 
         }
 
-        List<Integer> getNeighbors() {
-            return new ArrayList<>(neighbors);
+        Set<Integer> getNeighbors() {
+            return neighbors;
         }
     }
 }

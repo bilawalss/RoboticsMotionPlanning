@@ -57,4 +57,18 @@ public class Configuration {
         SimpleMatrix v2 = other.toVector();
         return v1.minus(v2).normF();
     }
+
+    public boolean equals(Object o) {
+        if (o == this)
+            return true;
+
+        if (!(o instanceof Configuration))
+            return false;
+
+        Configuration c = (Configuration) o;
+
+        return Double.compare(c.x, this.x) == 0 &&
+               Double.compare(c.y, this.y) == 0 &&
+               Double.compare(c.angle, this.angle) == 0;
+    }
 }

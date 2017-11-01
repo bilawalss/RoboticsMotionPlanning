@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import geometry.Configuration;
+import utils.PairRes;
 
 import org.ejml.simple.SimpleMatrix;
 
@@ -30,9 +31,9 @@ public class LocalPlanner {
         Configuration current = start;
 
         // compute the step vector
-        SimpleMatrix diff = end.toVector().minus(start.toVector());
-        int numSteps = (int)Math.ceil(diff.normF() / delta);
-        SimpleMatrix step = diff.divide(numSteps);
+        PairRes<Integer, SimpleMatrix> numAndStep = computeStepVector(start, end, delta);
+        int numSteps = numAndStep.first;
+        SimpleMatrix step = numAndStep.second;
 
         // go from start to end configuration step by step
         for (int i = 0; i < numSteps; i++) {
@@ -51,9 +52,25 @@ public class LocalPlanner {
     }
 
 
+    public Configuration getNextConfiguration(Configuration start, Configuration end, 
+            double delta) {
+        SimpleMatrix step = computeStepVector(start, end, delta).second;
+        return getNextConfiguration(start, step);
+    }
+
+
     /* Get the next configuration within a specific step from the current one. */
     private Configuration getNextConfiguration(Configuration current, SimpleMatrix step) {
         SimpleMatrix nextVector = current.toVector().plus(step);
         return new Configuration(nextVector.get(0, 0), nextVector.get(1, 0), nextVector.get(2, 0));
+    }
+
+
+    private PairRes<Integer, SimpleMatrix> computeStepVector(Configuration start, 
+                Configuration end, double delta) {
+        SimpleMatrix diff = end.toVector().minus(start.toVector());
+        int numSteps = (int)Math.ceil(diff.normF() / delta);
+        SimpleMatrix step = diff.divide(numSteps);
+        return new PairRes<>(numSteps, step);
     }
 }
