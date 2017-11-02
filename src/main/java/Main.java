@@ -83,6 +83,54 @@ public class Main extends Application {
         }       
     }
 
+    private static void drawGraphPRM(Group root, Graph g, Color color) {
+        // draw nodes
+        for (int i = 0; i < g.size() - 2; i++) {
+            Configuration c = g.getVertex(i);
+            Circle circle = new Circle();
+            circle.setCenterX(c.getX());
+            circle.setCenterY(c.getY());
+            circle.setRadius(10.0);
+            circle.setFill(color);
+            root.getChildren().add(circle);
+        } 
+
+        Configuration start = g.getVertex(g.size()-2);
+        Configuration end = g.getVertex(g.size()-1);
+
+        Circle circle = new Circle();
+        circle.setCenterX(start.getX());
+        circle.setCenterY(start.getY());
+        circle.setRadius(10.0);
+        circle.setFill(Color.RED);
+        root.getChildren().add(circle);
+
+        Circle circle2 = new Circle();
+        circle2.setCenterX(end.getX());
+        circle2.setCenterY(end.getY());
+        circle2.setRadius(10.0);
+        circle2.setFill(Color.PURPLE);
+        root.getChildren().add(circle2);
+
+
+        // draw edges
+        for (int i = 0; i < g.size() - 1; i++) {
+            for (int j = i + 1; j < g.size(); j++) {
+                if (g.isConnected(i, j)) {
+                    Line line = new Line();
+
+                    line.setStartX(g.getVertex(i).getX());
+                    line.setStartY(g.getVertex(i).getY());
+                    line.setEndX(g.getVertex(j).getX());
+                    line.setEndY(g.getVertex(j).getY());
+
+                    line.setStroke(color);
+                    root.getChildren().add(line);
+                }
+            } 
+        }       
+    }
+
 
     @Override
     public void start(Stage stage) {
@@ -200,7 +248,7 @@ public class Main extends Application {
             
             LocalPlanner localPlanner = new LocalPlanner();
 
-            Configuration start = new Configuration(200, 120, 0.3);
+            Configuration start = new Configuration(34, 20, 0.3);
             Configuration end = new Configuration(150, 350, 1.2);
 
             PRM prm = new PRM(env, sampler, localPlanner);
@@ -209,12 +257,27 @@ public class Main extends Application {
             Graph g = prm.buildRoadMap(600, 400, 100);       
             drawGraph(prmRoot, g, Color.RED); 
                 
-            List<Configuration> points = prm.pathPlanning(g, start, end);    
+            g = prm.pathPlanning(g, start, end);    
+            drawGraphPRM(prmRoot, g, Color.BLUE);
 
             Timeline timeline = new Timeline();
 
             timeline.setCycleCount(Timeline.INDEFINITE);
             timeline.setAutoReverse(true);
+
+            List<Configuration> res = prm.getSolution();
+
+            for (int i = 0; i < res.size() - 1; i++) {
+                Line line = new Line();
+
+                line.setStartX(res.get(i).getX());
+                line.setStartY(res.get(i).getY());
+                line.setEndX(res.get(i+1).getX());
+                line.setEndY(res.get(i+1).getY());
+
+                line.setStroke(Color.BLACK);
+                prmRoot.getChildren().add(line);
+            }
 
             //You can add a specific action when each frame is started.
             /*

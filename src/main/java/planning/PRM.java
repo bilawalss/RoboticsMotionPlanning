@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 public class PRM extends MotionPlanner {
 
+	List<Configuration> res;
+
     public PRM(Environment env, Sampler sampler, LocalPlanner localPlanner) {
         this.env = env;
         this.sampler = sampler;
@@ -58,15 +60,15 @@ public class PRM extends MotionPlanner {
         return g;
     }
 
-    public List<Configuration> pathPlanning(Graph g, Configuration start, Configuration end) {
+    public Graph pathPlanning(Graph g, Configuration start, Configuration end) {
 
         if (env.checkCollision(start)) return null;
         if (env.checkCollision(end)) return null;
 
          // add this to the graph
         long startTime = System.nanoTime();
-         int startPos = g.addVertex(start);
-         int endPos = g.addVertex(end);
+        int startPos = g.addVertex(start);
+        int endPos = g.addVertex(end);
     
         for (int i = 0; i < 2; i++) {
             int pos = 0;
@@ -88,17 +90,25 @@ public class PRM extends MotionPlanner {
 
         startTime = System.nanoTime();
         List<Integer> shortestPath = g.shortestPath(startPos, endPos);
-        List<Configuration> res = new ArrayList<>();
+        res = new ArrayList<>();
 
         endTime = System.nanoTime();
         duration = endTime - startTime;
         System.out.println("Time to find shortest path between start and end positions: "+ duration/1000000);
 
+        System.out.println("Graph size: "+g.size());
         for (int i = 0; i < shortestPath.size(); i++) {
             Configuration u = g.getVertex(shortestPath.get(i));
+            System.out.println("Shortest Path: "+i+" "+shortestPath.get(i));
         	res.add(u);
         }  
 
-        return res;
+
+
+        return g;
     }    
+
+    public List<Configuration> getSolution() {
+    	return res;
+    }
 }
