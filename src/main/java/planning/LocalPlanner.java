@@ -66,7 +66,7 @@ public class LocalPlanner {
     }
 
 
-    private PairRes<Integer, SimpleMatrix> computeStepVector(Configuration start, 
+    public PairRes<Integer, SimpleMatrix> computeStepVector(Configuration start, 
                 Configuration end, double delta) {
         SimpleMatrix diff = end.toVector().minus(start.toVector());
         int numSteps = (int)Math.ceil(diff.normF() / delta);

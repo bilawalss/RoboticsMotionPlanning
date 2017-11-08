@@ -34,7 +34,15 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 
+import javafx.animation.SequentialTransition;
+import javafx.animation.ParallelTransition;
+import javafx.animation.RotateTransition;
+import javafx.animation.TranslateTransition;
+
+import javafx.util.Duration;
+
 import static global.Constants.DEBUG;
+import utils.PairRes;
 
 
 /**
@@ -42,14 +50,59 @@ import static global.Constants.DEBUG;
  * @author: Bilawal Shaikh and Thang Le
  */
 public class Main extends Application {
-
-    private AnimationTimer timer;
     
     private static void printObjectArray(Object[] data) {
         for (int i = 0; i < data.length; i++) {
             System.out.print(data[i] + ", ");
         }
         System.out.println();
+    }
+
+    private static void animate(Group root, Environment env, LocalPlanner localPlanner, 
+            List<Configuration> configs) {
+        SequentialTransition seq = new SequentialTransition();
+
+        for (int i = 0; i < configs.size() - 1; i++) {
+            Configuration start  = configs.get(i);
+            Configuration end = configs.get(i+1);
+
+            PairRes<Integer, SimpleMatrix> numAndStep  = 
+                localPlanner.computeStepVector(start, end, 10.0);
+            int numSteps = numAndStep.first;
+            SimpleMatrix step = numAndStep.second;
+
+            Polygon poly = new Polygon();
+            poly.getPoints().addAll(env.getRobotPointArray(start));
+
+            root.getChildren().add(poly);
+
+            for (int j = 0; j < numSteps; j++) {
+                TranslateTransition translation = new TranslateTransition();
+                RotateTransition rotation = new RotateTransition();
+                System.out.println(rotation.getFromAngle());
+
+                translation.setDuration(Duration.millis(500));
+
+                translation.setFromX(step.get(0, 0) * j);
+                translation.setFromY(step.get(1, 0) * j);
+                translation.setByX(step.get(0, 0));
+                translation.setByY(step.get(1, 0));
+
+                translation.setRate(2);
+
+                rotation.setDuration(Duration.millis(500));
+                rotation.setFromAngle(Math.toDegrees(start.getAngle() + step.get(2, 0) * j));
+                rotation.setByAngle(Math.toDegrees(step.get(2, 0)));
+
+                rotation.setRate(2);
+
+                ParallelTransition parallel = new ParallelTransition(poly, translation, rotation);
+
+                seq.getChildren().add(parallel);
+            }
+        }
+
+        seq.play();
     }
 
 
@@ -60,7 +113,7 @@ public class Main extends Application {
             Circle circle = new Circle();
             circle.setCenterX(c.getX());
             circle.setCenterY(c.getY());
-            circle.setRadius(10.0);
+            circle.setRadius(5.0);
             circle.setFill(color);
             root.getChildren().add(circle);
         } 
@@ -213,7 +266,7 @@ public class Main extends Application {
             Graph g1 = rrt.build(start, 20);
             Graph g2 = rrt.build(end, 20);
 
-            if (rrt.merge(g1, g2, 1000)) {
+            if (rrt.merge(g1, g2, 1000) != null) {
                 // draw the trees after merge
                 drawGraph(debugRoot, g1, Color.RED);                    
                 drawGraph(debugRoot, g2, Color.BLUE);
@@ -231,11 +284,11 @@ public class Main extends Application {
             Scene prmScene = new Scene(prmRoot, 600, 400);
 
             for (PolygonObject obstacle : obstacles ) {
-                  Polygon obstaclePolygon = new Polygon();
-                  obstaclePolygon.getPoints().addAll(obstacle.getPointArray());
-                 
-                 prmRoot.getChildren().add(obstaclePolygon);
-              }
+                Polygon obstaclePolygon = new Polygon();
+                obstaclePolygon.getPoints().addAll(obstacle.getPointArray());
+
+                prmRoot.getChildren().add(obstaclePolygon);
+            }
 
             Polygon original = new Polygon();
             Robot r = new Robot(new double[] { -10, 0, 0, 10, 10, 0, 0, -10 });
@@ -245,7 +298,6 @@ public class Main extends Application {
             Environment env = new Environment(r, obstacles, 600, 400);
             Sampler sampler = new Sampler();
 
-            
             LocalPlanner localPlanner = new LocalPlanner();
 
             Configuration start = new Configuration(34, 20, 0.3);
@@ -260,58 +312,9 @@ public class Main extends Application {
             g = prm.pathPlanning(g, start, end);    
             drawGraphPRM(prmRoot, g, Color.BLUE);
 
-            Timeline timeline = new Timeline();
-
-            timeline.setCycleCount(Timeline.INDEFINITE);
-            timeline.setAutoReverse(true);
-
             List<Configuration> res = prm.getSolution();
-
-            for (int i = 0; i < res.size() - 1; i++) {
-                Line line = new Line();
-
-                line.setStartX(res.get(i).getX());
-                line.setStartY(res.get(i).getY());
-                line.setEndX(res.get(i+1).getX());
-                line.setEndY(res.get(i+1).getY());
-
-                line.setStroke(Color.BLACK);
-                prmRoot.getChildren().add(line);
-            }
-
-            //You can add a specific action when each frame is started.
-            /*
-            timer = new AnimationTimer() {
-                private long lastUpdate = 0;
-                int i = 0;
-                int j = 0;
-                @Override
-                public void handle(long now) {
-                    //drawGraph(prmRoot, g, Color.RED);
-                    Polygon poly = new Polygon();
-                    Configuration c = points.get(i);
-                    Configuration d = points.get(i+1);
-                    List<Configuration> secondaryPoints = localPlanner.getPath(env, c, d, 10.0);
-
-                    Configuration e = secondaryPoints.get(j);
-                    poly.getPoints().addAll(env.getRobotPointArray(e));
-                    prmRoot.getChildren().add(poly);
-
-                    //prmRoot.getChildren().remove(poly);
-                    //if (now - lastUpdate >= 28) {
-                        j++;
-                        if (e.equals(d)) {
-                            i++;
-                            j = 0;
-                        }
-                      //  lastUpdate = now;
-                   // }
-                }
-            };
-            */
             
-            //timer.start();
-            //timeline.play();
+            animate(prmRoot, env, localPlanner, res);
 
             prmStage.setScene(prmScene);
             prmStage.show();
