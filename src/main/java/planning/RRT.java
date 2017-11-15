@@ -20,9 +20,25 @@ public class RRT extends MotionPlanner {
     public List<Configuration> query (Configuration start, Configuration end, int n, int l) {
         List<Configuration> res = new ArrayList<>();
 
-        Graph g1 = build(start, n);
-        Graph g2 = build(start, n);
-        return null;
+        Graph srcRRT = build(start, n);
+        Graph tarRRT = build(end, n);
+
+        // merge 2 RRTs
+        PairRes<Integer, Integer> p = merge(srcRRT, tarRRT, l);
+        
+        List<Configuration> path = new ArrayList<>();
+
+        // add path in the src tree
+        for (int index: srcRRT.shortestPath(0, p.first)) {
+            path.add(srcRRT.getVertex(index));
+        }
+
+        // add path in the goal tree
+        for (int index: tarRRT.shortestPath(p.second, 0)) {
+            path.add(tarRRT.getVertex(index));
+        }
+
+        return path;
     }
 
 
@@ -44,21 +60,20 @@ public class RRT extends MotionPlanner {
     }
 
 
-    public List<PairRes<Graph, Integer>> merge(Graph g1, Graph g2, int l) {
+    public PairRes<Integer, Integer> merge(Graph g1, Graph g2, int l) {
+        Graph first = g1, second = g2;
+
         for (int i = 1; i <= l; i++) {
             Configuration qRand = sampler.getSamplePoint(env.getWorldWidth(), env.getWorldHeight());
             int qNewIdx1 = extend(g1, qRand);
             if (qNewIdx1 != -1) {
                 int qNewIdx2 = extend(g2, g1.getVertex(qNewIdx1));
                 if (qNewIdx2 != -1 && g1.getVertex(qNewIdx1).equals(g2.getVertex(qNewIdx2))) {
-                    PairRes<Graph, Integer> p1 = new PairRes<>(g1, qNewIdx1);
-                    PairRes<Graph, Integer> p2 = new PairRes<>(g2, qNewIdx2);
-
-                    List<PairRes<Graph, Integer>> res = new ArrayList<>();
-                    res.add(p1);
-                    res.add(p2);
-
-                    return res;
+                    if (g1 == first) {
+                        return new PairRes<>(qNewIdx1, qNewIdx2);
+                    } else {
+                        return new PairRes<>(qNewIdx2, qNewIdx1);
+                    }
                 }
             }
             // swap 

@@ -60,38 +60,41 @@ public class Main extends Application {
 
     private static void animate(Group root, Environment env, LocalPlanner localPlanner, 
             List<Configuration> configs) {
+
         SequentialTransition seq = new SequentialTransition();
 
-        for (int i = 0; i < configs.size() - 1; i++) {
-            Configuration start  = configs.get(i);
-            Configuration end = configs.get(i+1);
+        // get the starting point
+        Configuration start = configs.get(0);
+        Polygon poly = new Polygon();
+        poly.getPoints().addAll(env.getRobotPointArray(start));
+        root.getChildren().add(poly);
 
+        double xOffset = 0.0;
+        double yOffset = 0.0;
+        double angleOffset = 0.0;
+
+        for (int i = 0; i < configs.size() - 1; i++) {
+            Configuration end = configs.get(i+1);
             PairRes<Integer, SimpleMatrix> numAndStep  = 
                 localPlanner.computeStepVector(start, end, 10.0);
             int numSteps = numAndStep.first;
             SimpleMatrix step = numAndStep.second;
 
-            Polygon poly = new Polygon();
-            poly.getPoints().addAll(env.getRobotPointArray(start));
-
-            root.getChildren().add(poly);
-
             for (int j = 0; j < numSteps; j++) {
                 TranslateTransition translation = new TranslateTransition();
                 RotateTransition rotation = new RotateTransition();
-                System.out.println(rotation.getFromAngle());
 
                 translation.setDuration(Duration.millis(500));
 
-                translation.setFromX(step.get(0, 0) * j);
-                translation.setFromY(step.get(1, 0) * j);
+                translation.setFromX(xOffset);
+                translation.setFromY(yOffset);
                 translation.setByX(step.get(0, 0));
                 translation.setByY(step.get(1, 0));
 
                 translation.setRate(2);
-
+                
                 rotation.setDuration(Duration.millis(500));
-                rotation.setFromAngle(Math.toDegrees(start.getAngle() + step.get(2, 0) * j));
+                rotation.setFromAngle(Math.toDegrees(angleOffset));
                 rotation.setByAngle(Math.toDegrees(step.get(2, 0)));
 
                 rotation.setRate(2);
@@ -99,7 +102,14 @@ public class Main extends Application {
                 ParallelTransition parallel = new ParallelTransition(poly, translation, rotation);
 
                 seq.getChildren().add(parallel);
+
+                // add the offsets (how far from the original position)
+                xOffset += step.get(0, 0);
+                yOffset += step.get(1, 0);
+                angleOffset += step.get(2, 0);
             }
+
+            start = end;
         }
 
         seq.play();
@@ -250,9 +260,7 @@ public class Main extends Application {
                 debugRoot.getChildren().add(obstaclePolygon);
             }
         
-            Polygon original = new Polygon();
             Robot r = new Robot(new double[] { -10, 0, 0, 10, 10, 0, 0, -10 });
-            original.setFill(Color.BLUE);
 
             // create motion planner
             Environment env = new Environment(r, obstacles, 600, 400);
@@ -263,6 +271,20 @@ public class Main extends Application {
             Configuration end = new Configuration(150, 350, 1.2);
 
             RRT rrt = new RRT(env, sampler, localPlanner);
+
+            // draw start and end
+            Polygon startPoly = new Polygon();
+            Polygon endPoly = new Polygon();
+            startPoly.getPoints().addAll(env.getRobotPointArray(start));
+            endPoly.getPoints().addAll(env.getRobotPointArray(end));
+
+            startPoly.setFill(Color.RED);
+            endPoly.setFill(Color.BLUE);
+
+            debugRoot.getChildren().add(startPoly);
+            debugRoot.getChildren().add(endPoly);
+
+            /*
             Graph g1 = rrt.build(start, 20);
             Graph g2 = rrt.build(end, 20);
 
@@ -270,7 +292,10 @@ public class Main extends Application {
                 // draw the trees after merge
                 drawGraph(debugRoot, g1, Color.RED);                    
                 drawGraph(debugRoot, g2, Color.BLUE);
-            }
+            }*/
+
+            List<Configuration> path = rrt.query(start, end, 10, 1000);
+            animate(debugRoot, env, localPlanner, path);
 
             debugStage.setScene(debugScene);
             debugStage.show();
@@ -429,3 +454,4 @@ public class Main extends Application {
         launch(args);
     }
 }
+
