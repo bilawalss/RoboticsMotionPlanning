@@ -195,18 +195,24 @@ public class Main extends Application {
 
         // load the obstacles file as stream
         ClassLoader classLoader = getClass().getClassLoader();
-        InputStream obstacleStream = classLoader.getResourceAsStream("obstacles.txt");
-        Scanner sc = new Scanner(obstacleStream);
-
+        InputStream resourceStream = classLoader.getResourceAsStream("resources.txt");
+        Scanner sc = new Scanner(resourceStream);
+        
         //Creating a scene object
         scene.setRoot(polygons);
         //Setting title to the Stage
         stage.setTitle("Robotics Simulator");
 
         List<PolygonObject> obstacles = new ArrayList<>();
+   
+        if (!sc.next().equals("OBSTACLES")) {
+            return;
+        }
 
+        int obstacleNumber = sc.nextInt();
+        sc.nextLine();
         // read obstacle file
-        while (sc.hasNextLine()) {
+        for (int n = 0; n < obstacleNumber; n++) {
             String line = sc.nextLine().trim(); 
             if (line.isEmpty())
                 break;
@@ -251,6 +257,7 @@ public class Main extends Application {
             }
         
             Polygon original = new Polygon();
+
             Robot r = new Robot(new double[] { -10, 0, 0, 10, 10, 0, 0, -10 });
             original.setFill(Color.BLUE);
 
@@ -291,25 +298,65 @@ public class Main extends Application {
             }
 
             Polygon original = new Polygon();
-            Robot r = new Robot(new double[] { -10, 0, 0, 10, 10, 0, 0, -10 });
+
+    
+            if (!sc.next().equals("ROBOT")) {
+                return;
+            }
+
+            sc.nextLine();
+
+            String line = sc.nextLine();
+
+            String[] robotTokens = line.split(" ");
+            double[] robotData = new double[robotTokens.length];
+            
+            for (int i = 0; i < robotTokens.length; i++) {
+                robotData[i] = Double.parseDouble(robotTokens[i]);
+            } 
+
+            Robot r = new Robot(robotData);
             original.setFill(Color.BLUE);
 
+            sc.next();
+            int worldWidth = sc.nextInt();
+            sc.next();
+            int worldHeight = sc.nextInt();
+
+
             // create motion planner
-            Environment env = new Environment(r, obstacles, 600, 400);
+            Environment env = new Environment(r, obstacles, worldWidth, worldHeight);
             Sampler sampler = new Sampler();
 
             LocalPlanner localPlanner = new LocalPlanner();
 
-            Configuration start = new Configuration(34, 20, 0.3);
-            Configuration end = new Configuration(150, 350, 1.2);
+            sc.next();
+            int startX = sc.nextInt();
+            int startY = sc.nextInt();
+            double startAngle = sc.nextDouble();
+
+            System.out.println(startX+" "+startY+" "+startAngle);
+
+            sc.next();
+            int endX = sc.nextInt();
+            int endY = sc.nextInt();
+            double endAngle = sc.nextDouble();
+
+            Configuration start = new Configuration(startX, startY, startAngle);
+            Configuration end = new Configuration(endX, endY, endAngle);
 
             PRM prm = new PRM(env, sampler, localPlanner);
 
+            sc.next();
+            int samplePoints = sc.nextInt();
+
+            sc.next();
+            int closestVertices = sc.nextInt();
             // third parameter is the number of sample iterations
-            Graph g = prm.buildRoadMap(600, 400, 100);       
+            Graph g = prm.buildRoadMap(worldWidth, worldHeight, samplePoints, closestVertices);       
             drawGraph(prmRoot, g, Color.RED); 
                 
-            g = prm.pathPlanning(g, start, end);    
+            g = prm.pathPlanning(g, start, end, closestVertices);    
             drawGraphPRM(prmRoot, g, Color.BLUE);
 
             List<Configuration> res = prm.getSolution();

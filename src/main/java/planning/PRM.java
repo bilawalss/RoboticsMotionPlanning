@@ -5,6 +5,10 @@ import geometry.Configuration;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
+
+import java.io.PrintWriter;
+import java.io.File;
 
 
 public class PRM extends MotionPlanner {
@@ -15,58 +19,95 @@ public class PRM extends MotionPlanner {
         this.env = env;
         this.sampler = sampler;
         this.localPlanner = localPlanner;
+
+        /*
+        Date d = new Date();
+		String s = d.toString();
+		System.out.println("Date: ");
+		File file = new File(s);
+		file.getParentFile().mkdirs();
+
+		PrintWriter printWriter = new PrintWriter(file);
+		*/
     }
 
-    public Graph buildRoadMap(int worldWidth, int worldHeight, int samplePoints) {
-    	long startTime = System.nanoTime();
+    public Graph buildRoadMap(int worldWidth, int worldHeight, int samplePoints, int closestVertices) {
+    	
 		
 
     	int size = 0;
         Graph g = new Graph();
-        for (int i = 0; i < samplePoints; i++) {
-            Configuration c = sampler.getSamplePoint(worldWidth, worldHeight);
-            if (!env.checkCollision(c)) {
-                size++;
-                g.addVertex(c);
-     
+        while (size < samplePoints) {
+        	
+    		long startTime = System.nanoTime();
+        	Configuration c = sampler.getSamplePoint(worldWidth, worldHeight);
+        	if (!env.checkCollision(c)) {
+            	size++;
+            	g.addVertex(c);
+ 			}
+
+ 			if (size == 0) {
+
+     			long endTime = System.nanoTime();
+       			long duration = (endTime - startTime);
+        		System.out.println("Time to Sample point: "+ duration);
             }
             
         }
 
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime);
-        System.out.println("Time to Sample points: "+ duration/1000000);
+        
 
-        startTime = System.nanoTime();
+        boolean done  = true;
         // initialize configurations
         for (int i = 0; i < size; i++) {
+        	List<Integer> neighbors = null;
             // Closest vertices to the 5 closest ones.
-            List<Integer> neighbors = g.getKClosestVertices(i, 5);
+            if (i == 0) {
+            	long startTime = System.nanoTime();
+           		neighbors = g.getKClosestVertices(i, closestVertices);
+           		long endTime = System.nanoTime();
+           		long duration = endTime - startTime;
+           		System.out.println("Time for K nearest neighbors: "+duration);
+           	}
+           	if (i != 0) {
+           		neighbors = g.getKClosestVertices(i, closestVertices);
+           	}
 
             // if the local planner does not have any obtacles between the object, add the
             // object to the graph
+            
             for (int neighbor : neighbors) {
+            	long startTime = System.nanoTime();
                 if (localPlanner.getPath(env, g.getVertex(i), g.getVertex(neighbor), 10) != null) {
+                	if (done) {
+                		long endTime = System.nanoTime();
+                		long duration = endTime - startTime;
+                		System.out.println("Time for Local Planner: "+duration);
+                		done = false;
+
+                	}
                     g.addEdge(i, neighbor);
                     
                 }
             }
         }  
 
-        endTime = System.nanoTime();  
-        duration = (endTime - startTime);
-        System.out.println("Time to use Local Planner to finish RoadMap: "+ duration/1000000);
+        
 
         return g;
     }
 
-    public Graph pathPlanning(Graph g, Configuration start, Configuration end) {
+    public Graph pathPlanning(Graph g, Configuration start, Configuration end, int closestVertices) {
 
+    	long startTime = System.nanoTime();
         if (env.checkCollision(start)) return null;
+        long endTime = System.nanoTime();
+        long duration = endTime - startTime;
+        System.out.println("Time to check collision for each sample point: "+duration);
         if (env.checkCollision(end)) return null;
 
          // add this to the graph
-        long startTime = System.nanoTime();
+        startTime = System.nanoTime();
         int startPos = g.addVertex(start);
         int endPos = g.addVertex(end);
     
@@ -74,7 +115,7 @@ public class PRM extends MotionPlanner {
             int pos = 0;
             if (i == 0) pos = startPos;
             if (i == 1) pos = endPos;
-             List<Integer> neighbors = g.getKClosestVertices(pos, 10);
+             List<Integer> neighbors = g.getKClosestVertices(pos, closestVertices);
              for (int neighbor : neighbors) {
                 if (localPlanner.getPath(env, g.getVertex(pos), g.getVertex(neighbor), 10) != null) {
                     g.addEdge(pos, neighbor);
@@ -83,9 +124,9 @@ public class PRM extends MotionPlanner {
             }
         }   
 
-        long endTime = System.nanoTime();
-        long duration = endTime - startTime;
-        System.out.println("Time to add Start and End Nodes to the RoadMap "+ duration/1000000);     
+        endTime = System.nanoTime();
+        duration = endTime - startTime;
+        System.out.println("Time to add Start and End Nodes to the RoadMap "+ duration);     
 
 
         startTime = System.nanoTime();
@@ -94,7 +135,7 @@ public class PRM extends MotionPlanner {
 
         endTime = System.nanoTime();
         duration = endTime - startTime;
-        System.out.println("Time to find shortest path between start and end positions: "+ duration/1000000);
+        System.out.println("Time to find shortest path between start and end positions: "+ duration);
 
         System.out.println("Graph size: "+g.size());
         for (int i = 0; i < shortestPath.size(); i++) {
