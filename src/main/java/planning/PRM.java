@@ -17,8 +17,9 @@ import java.io.IOException;
 public class PRM extends MotionPlanner {
 
 	List<Configuration> res;
+	String s = "";
 
-    public PRM(Environment env, Sampler sampler, LocalPlanner localPlanner) throws IOException {
+    public PRM(Environment env, Sampler sampler, LocalPlanner localPlanner) {
         
         
     	this.env = env;
@@ -31,10 +32,7 @@ public class PRM extends MotionPlanner {
 		System.out.println("Date: ");
 		*/
 
-		FileWriter fileWriter = new FileWriter("hello.txt");
-		BufferedWriter bw = new BufferedWriter(fileWriter);
-		bw.write("hi");
-		bw.close();
+		
     }
 
     public Graph buildRoadMap(int worldWidth, int worldHeight, int samplePoints, int closestVertices) {
@@ -56,7 +54,7 @@ public class PRM extends MotionPlanner {
 
      			long endTime = System.nanoTime();
        			long duration = (endTime - startTime);
-        		System.out.println("Time to Sample point: "+ duration);
+        		s += "Time to Sample point: "+ duration +"\n";
             }
             
         }
@@ -73,7 +71,7 @@ public class PRM extends MotionPlanner {
            		neighbors = g.getKClosestVertices(i, closestVertices);
            		long endTime = System.nanoTime();
            		long duration = endTime - startTime;
-           		System.out.println("Time for K nearest neighbors: "+duration);
+           		s += "Time for K nearest neighbors: "+ duration +"\n";
            	}
            	if (i != 0) {
            		neighbors = g.getKClosestVertices(i, closestVertices);
@@ -88,7 +86,7 @@ public class PRM extends MotionPlanner {
                 	if (done) {
                 		long endTime = System.nanoTime();
                 		long duration = endTime - startTime;
-                		System.out.println("Time for Local Planner: "+duration);
+                		s += "Time for LocalPlanner: "+ duration +"\n";
                 		done = false;
 
                 	}
@@ -109,7 +107,7 @@ public class PRM extends MotionPlanner {
         if (env.checkCollision(start)) return null;
         long endTime = System.nanoTime();
         long duration = endTime - startTime;
-        System.out.println("Time to check collision for each sample point: "+duration);
+        s += "Time to check collision for each sample point: "+ duration +"\n";
         if (env.checkCollision(end)) return null;
 
          // add this to the graph
@@ -132,7 +130,7 @@ public class PRM extends MotionPlanner {
 
         endTime = System.nanoTime();
         duration = endTime - startTime;
-        System.out.println("Time to add Start and End Nodes to the RoadMap "+ duration);     
+        s += "Time to add start and end nodes to the roadmap: "+ duration +"\n";    
 
 
         startTime = System.nanoTime();
@@ -141,7 +139,7 @@ public class PRM extends MotionPlanner {
 
         endTime = System.nanoTime();
         duration = endTime - startTime;
-        System.out.println("Time to find shortest path between start and end positions: "+ duration);
+        s += "Time to find shortest path: "+ duration +"\n";
 
         System.out.println("Graph size: "+g.size());
         for (int i = 0; i < shortestPath.size(); i++) {
@@ -157,5 +155,9 @@ public class PRM extends MotionPlanner {
 
     public List<Configuration> getSolution() {
     	return res;
+    }
+
+    public String getTimes() {
+    	return s;
     }
 }

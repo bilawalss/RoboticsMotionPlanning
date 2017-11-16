@@ -42,6 +42,13 @@ import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 import static global.Constants.DEBUG;
 import utils.PairRes;
@@ -198,7 +205,7 @@ public class Main extends Application {
 
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) throws IOException {
         Group root = new Group();
         Scene scene = new Scene(root, 600, 600);
 
@@ -371,13 +378,8 @@ public class Main extends Application {
             Configuration start = new Configuration(startX, startY, startAngle);
             Configuration end = new Configuration(endX, endY, endAngle);
 
-            PRM prm = null;
-            try {
-
-                prm = new PRM(env, sampler, localPlanner);
-            } catch (IOException e) {
-                System.out.println("Look here: "+e.getMessage());
-            }
+            PRM prm = new PRM(env, sampler, localPlanner);
+            
 
             sc.next();
             int samplePoints = sc.nextInt();
@@ -394,6 +396,19 @@ public class Main extends Application {
             List<Configuration> res = prm.getSolution();
             
             animate(prmRoot, env, localPlanner, res);
+
+            Date date = new Date();
+            String s = date.toString();
+            try {
+                try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(s + ".txt"), "utf-8"))) {
+                        writer.write(prm.getTimes());
+                }
+
+                
+            } catch (IOException e) {
+                System.out.println("Look here: "+e.getMessage());
+            }
 
             prmStage.setScene(prmScene);
             prmStage.show();
