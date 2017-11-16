@@ -20,11 +20,24 @@ public class RRT extends MotionPlanner {
     public List<Configuration> query (Configuration start, Configuration end, int n, int l) {
         List<Configuration> res = new ArrayList<>();
 
+        long startTime = System.nanoTime();
         Graph srcRRT = build(start, n);
+        long endTime = System.nanoTime();
+        long duration = endTime - startTime;
+        System.out.println("Build srcRRT: " + duration);
+
+        startTime = System.nanoTime();
         Graph tarRRT = build(end, n);
+        endTime = System.nanoTime();
+        duration = System.nanoTime();
+        System.out.println("Build tarRRT: " + duration);
 
         // merge 2 RRTs
+        startTime = System.nanoTime();
         PairRes<Integer, Integer> p = merge(srcRRT, tarRRT, l);
+        endTime = System.nanoTime();
+        duration = endTime - startTime;
+        System.out.println("Merge two graphs: " + duration);
         
         List<Configuration> path = new ArrayList<>();
 

@@ -41,6 +41,8 @@ import javafx.animation.TranslateTransition;
 
 import javafx.util.Duration;
 
+import java.io.IOException;
+
 import static global.Constants.DEBUG;
 import utils.PairRes;
 
@@ -196,7 +198,7 @@ public class Main extends Application {
 
 
     @Override
-    public void start(Stage stage) {
+    public void start(Stage stage) throws Exception {
         Group root = new Group();
         Scene scene = new Scene(root, 600, 600);
 
@@ -369,7 +371,13 @@ public class Main extends Application {
             Configuration start = new Configuration(startX, startY, startAngle);
             Configuration end = new Configuration(endX, endY, endAngle);
 
-            PRM prm = new PRM(env, sampler, localPlanner);
+            PRM prm = null;
+            try {
+
+                prm = new PRM(env, sampler, localPlanner);
+            } catch (IOException e) {
+                System.out.println("Look here: "+e.getMessage());
+            }
 
             sc.next();
             int samplePoints = sc.nextInt();

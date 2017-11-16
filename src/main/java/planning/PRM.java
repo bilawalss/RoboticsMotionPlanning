@@ -9,26 +9,32 @@ import java.util.Date;
 
 import java.io.PrintWriter;
 import java.io.File;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 
 public class PRM extends MotionPlanner {
 
 	List<Configuration> res;
 
-    public PRM(Environment env, Sampler sampler, LocalPlanner localPlanner) {
-        this.env = env;
-        this.sampler = sampler;
-        this.localPlanner = localPlanner;
+    public PRM(Environment env, Sampler sampler, LocalPlanner localPlanner) throws IOException {
+        
+        
+    	this.env = env;
+   		this.sampler = sampler;
+    	this.localPlanner = localPlanner;
 
-        /*
+    	/*
         Date d = new Date();
 		String s = d.toString();
 		System.out.println("Date: ");
-		File file = new File(s);
-		file.getParentFile().mkdirs();
-
-		PrintWriter printWriter = new PrintWriter(file);
 		*/
+
+		FileWriter fileWriter = new FileWriter("hello.txt");
+		BufferedWriter bw = new BufferedWriter(fileWriter);
+		bw.write("hi");
+		bw.close();
     }
 
     public Graph buildRoadMap(int worldWidth, int worldHeight, int samplePoints, int closestVertices) {
