@@ -262,7 +262,7 @@ public class Main extends Application {
         }
 
 
-        if (!DEBUG) {
+        if (DEBUG) {
             Group debugRoot = new Group();
             Stage debugStage = new Stage();
             Scene debugScene = new Scene(debugRoot, 600, 400);
@@ -310,6 +310,9 @@ public class Main extends Application {
             }*/
 
             List<Configuration> path = rrt.query(start, end, 10, 1000);
+            drawGraph(debugRoot, rrt.srcRRT, Color.RED);
+            drawGraph(debugRoot, rrt.tarRRT, Color.BLUE);
+
             animate(debugRoot, env, localPlanner, path);
 
             debugStage.setScene(debugScene);

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 
 public class RRT extends MotionPlanner {
+    public Graph srcRRT;
+    public Graph tarRRT;
 
     public RRT(Environment env, Sampler sampler, LocalPlanner localPlanner) {
         this.env = env;
@@ -20,25 +22,15 @@ public class RRT extends MotionPlanner {
     public List<Configuration> query (Configuration start, Configuration end, int n, int l) {
         List<Configuration> res = new ArrayList<>();
 
-        long startTime = System.nanoTime();
-        Graph srcRRT = build(start, n);
-        long endTime = System.nanoTime();
-        long duration = endTime - startTime;
-        System.out.println("Build srcRRT: " + duration);
+        // initialize 2 RRTs
+        srcRRT = new Graph();
+        tarRRT = new Graph();
+        srcRRT.addVertex(start);
+        tarRRT.addVertex(end);
 
-        startTime = System.nanoTime();
-        Graph tarRRT = build(end, n);
-        endTime = System.nanoTime();
-        duration = System.nanoTime();
-        System.out.println("Build tarRRT: " + duration);
-
-        // merge 2 RRTs
-        startTime = System.nanoTime();
+        // connect 2 RRTs
         PairRes<Integer, Integer> p = merge(srcRRT, tarRRT, l);
-        endTime = System.nanoTime();
-        duration = endTime - startTime;
-        System.out.println("Merge two graphs: " + duration);
-        
+
         List<Configuration> path = new ArrayList<>();
 
         // add path in the src tree
