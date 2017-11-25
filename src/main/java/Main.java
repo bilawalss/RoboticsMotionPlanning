@@ -262,7 +262,7 @@ public class Main extends Application {
         }
 
 
-        if (DEBUG) {
+        if (!DEBUG) {
             Group debugRoot = new Group();
             Stage debugStage = new Stage();
             Scene debugScene = new Scene(debugRoot, 600, 400);
