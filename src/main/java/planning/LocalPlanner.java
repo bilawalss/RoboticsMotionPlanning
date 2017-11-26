@@ -11,18 +11,23 @@ import org.ejml.simple.SimpleMatrix;
 
 /** Local planner for connecting two configuration points. */
 public class LocalPlanner {
+    // resolution distance
+    private double delta;
+
+    public LocalPlanner(double delta) {
+        this.delta = delta;
+    }
+
     /**
      * Get a collision-free path from a source configuration to a destined configuration in
      * a given environment and null if there is no such path. 
      * @param env environment (workspace)
      * @param start starting configuration
      * @param end ending configuration
-     * @param delta resolution distance 
-     * @return a List containing a set of configurations representing a collision-free path or 
+     * @return a List containing a set of configurations representing a collision-free path or
      * null if no such path exists
      */
-    public List<Configuration> getPath(Environment env, Configuration start, Configuration end, 
-            double delta) {
+    public List<Configuration> getPath(Environment env, Configuration start, Configuration end) {
         List<Configuration> configs = new ArrayList<>();
 
         // add the start configuration
@@ -31,7 +36,7 @@ public class LocalPlanner {
         Configuration current = start;
 
         // compute the step vector
-        PairRes<Integer, SimpleMatrix> numAndStep = computeStepVector(start, end, delta);
+        PairRes<Integer, SimpleMatrix> numAndStep = computeStepVector(start, end);
         int numSteps = numAndStep.first;
         SimpleMatrix step = numAndStep.second;
 
@@ -52,9 +57,8 @@ public class LocalPlanner {
     }
 
 
-    public Configuration getNextConfiguration(Configuration start, Configuration end, 
-            double delta) {
-        SimpleMatrix step = computeStepVector(start, end, delta).second;
+    public Configuration getNextConfiguration(Configuration start, Configuration end) {
+        SimpleMatrix step = computeStepVector(start, end).second;
         return getNextConfiguration(start, step);
     }
 
@@ -66,8 +70,7 @@ public class LocalPlanner {
     }
 
 
-    public PairRes<Integer, SimpleMatrix> computeStepVector(Configuration start, 
-                Configuration end, double delta) {
+    public PairRes<Integer, SimpleMatrix> computeStepVector(Configuration start, Configuration end) {
         SimpleMatrix diff = end.toVector().minus(start.toVector());
         int numSteps = (int)Math.ceil(diff.normF() / delta);
         SimpleMatrix step = diff.divide(numSteps);

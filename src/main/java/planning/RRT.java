@@ -9,19 +9,23 @@ import java.util.ArrayList;
 
 
 public class RRT extends MotionPlanner {
-    public Graph srcRRT;
-    public Graph tarRRT;
+    private Graph srcRRT, tarRRT;
+    private int numTrials;
 
-    public RRT(Environment env, Sampler sampler, LocalPlanner localPlanner) {
+
+    public RRT(Environment env, Sampler sampler, LocalPlanner localPlanner, int numTrials) {
         this.env = env;
         this.sampler = sampler;
         this.localPlanner = localPlanner;
+        this.numTrials = numTrials;
     }
 
 
-    public List<Configuration> query (Configuration start, Configuration end, int n, int l) {
-        List<Configuration> res = new ArrayList<>();
+    public Graph getSrcRRT () { return srcRRT; }
+    public Graph getTarRRT () { return tarRRT; }
 
+
+    public List<Configuration> query (Configuration start, Configuration end) {
         // initialize 2 RRTs
         srcRRT = new Graph();
         tarRRT = new Graph();
@@ -29,7 +33,7 @@ public class RRT extends MotionPlanner {
         tarRRT.addVertex(end);
 
         // connect 2 RRTs
-        PairRes<Integer, Integer> p = merge(srcRRT, tarRRT, l);
+        PairRes<Integer, Integer> p = merge(srcRRT, tarRRT, numTrials);
 
         List<Configuration> path = new ArrayList<>();
 
@@ -65,8 +69,8 @@ public class RRT extends MotionPlanner {
     }
 
 
-    public PairRes<Integer, Integer> merge(Graph g1, Graph g2, int l) {
-        Graph first = g1, second = g2;
+    private PairRes<Integer, Integer> merge(Graph g1, Graph g2, int l) {
+        Graph first = g1;
 
         for (int i = 1; i <= l; i++) {
             Configuration qRand = sampler.getSamplePoint(env.getWorldWidth(), env.getWorldHeight());
@@ -94,7 +98,7 @@ public class RRT extends MotionPlanner {
     private int extend(Graph g, Configuration q) {
         List<Integer> nearest = g.getKClosestVertices(q, 1, -1);
         Configuration qNear = g.getVertex(nearest.get(0));
-        Configuration qNew = localPlanner.getNextConfiguration(qNear, q, 10.0);
+        Configuration qNew = localPlanner.getNextConfiguration(qNear, q);
 
         if (!env.checkCollision(qNew)) {
             int newIdx = g.addVertex(qNew);

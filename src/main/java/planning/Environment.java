@@ -55,7 +55,12 @@ public class Environment {
        return robot.getPointArray(c);     
     }
 
-    
+
+    public List<PolygonObject> getObstacles () {
+        return obstacles;
+    }
+
+
     /** Checks if the robot collides with any obstacle given a configuration point. */
     public boolean checkCollision(Configuration c) {
         Double [] robotArray = robot.getPointArray(c);
