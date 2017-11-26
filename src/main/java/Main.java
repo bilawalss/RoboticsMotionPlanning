@@ -390,13 +390,14 @@ public class Main extends Application {
             sc.next();
             int closestVertices = sc.nextInt();
             // third parameter is the number of sample iterations
-            Graph g = prm.buildRoadMap(worldWidth, worldHeight, samplePoints, closestVertices);       
-            drawGraph(prmRoot, g, Color.RED); 
-                
-            g = prm.pathPlanning(g, start, end, closestVertices);    
-            drawGraphPRM(prmRoot, g, Color.BLUE);
+            prm.buildRoadMap(worldWidth, worldHeight, samplePoints, closestVertices);  
 
-            List<Configuration> res = prm.getSolution();
+            drawGraph(prmRoot, prm.getGraph(), Color.RED); 
+                
+            List<Configuration> res = prm.query(start, end, closestVertices);    
+            drawGraphPRM(prmRoot, prm.getGraph(), Color.BLUE);
+
+            //List<Configuration> res = prm.getSolution();
             
             animate(prmRoot, env, localPlanner, res);
 

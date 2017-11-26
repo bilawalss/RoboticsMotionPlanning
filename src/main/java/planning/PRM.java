@@ -16,6 +16,8 @@ import java.io.IOException;
 
 public class PRM extends MotionPlanner {
 
+	Graph g;
+	boolean done = false;
 	List<Configuration> res;
 	String s = "";
 
@@ -35,12 +37,12 @@ public class PRM extends MotionPlanner {
 		
     }
 
-    public Graph buildRoadMap(int worldWidth, int worldHeight, int samplePoints, int closestVertices) {
+    public void buildRoadMap(int worldWidth, int worldHeight, int samplePoints, int closestVertices) {
     	
 		
 
     	int size = 0;
-        Graph g = new Graph();
+        g = new Graph();
         while (size < samplePoints) {
         	
     		long startTime = System.nanoTime();
@@ -95,14 +97,10 @@ public class PRM extends MotionPlanner {
                 }
             }
         }  
-
-        
-
-        return g;
     }
 
-    public Graph pathPlanning(Graph g, Configuration start, Configuration end, int closestVertices) {
-
+    public List<Configuration> query(Configuration start, Configuration end, int closestVertices) {
+    	
     	long startTime = System.nanoTime();
         if (env.checkCollision(start)) return null;
         long endTime = System.nanoTime();
@@ -130,8 +128,7 @@ public class PRM extends MotionPlanner {
 
         endTime = System.nanoTime();
         duration = endTime - startTime;
-        s += "Time to add start and end nodes to the roadmap: "+ duration +"\n";    
-
+        s += "Time to add start and end nodes to the roadmap: "+ duration +"\n";  
 
         startTime = System.nanoTime();
         List<Integer> shortestPath = g.shortestPath(startPos, endPos);
@@ -150,11 +147,12 @@ public class PRM extends MotionPlanner {
 
 
 
-        return g;
+        return res;
     }    
 
-    public List<Configuration> getSolution() {
-    	return res;
+    
+    public Graph getGraph() {
+    	return g;
     }
 
     public String getTimes() {

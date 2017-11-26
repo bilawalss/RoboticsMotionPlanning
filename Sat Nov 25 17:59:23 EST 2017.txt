@@ -1,0 +1,5 @@
+Time for K nearest neighbors: 1944245
+Time for LocalPlanner: 1112986
+Time to check collision for each sample point: 14282
+Time to add start and end nodes to the roadmap: 358020
+Time to find shortest path: 1312816
