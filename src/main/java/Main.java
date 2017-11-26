@@ -4,18 +4,13 @@ import java.util.*;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-
 import javafx.scene.paint.Color;
 import javafx.scene.Scene;
 import javafx.scene.Group;
-import javafx.scene.control.Button;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 
-import javafx.util.Pair;
 import org.ejml.simple.SimpleMatrix;
 
 import geometry.PolygonObject;
@@ -30,11 +25,6 @@ import planning.LocalPlanner;
 import planning.RRT;
 import planning.PRM;
 
-import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
-
 import javafx.animation.SequentialTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.RotateTransition;
@@ -42,7 +32,6 @@ import javafx.animation.TranslateTransition;
 
 import javafx.util.Duration;
 
-import static global.Constants.DEBUG;
 import utils.PairRes;
 
 
@@ -54,12 +43,6 @@ public class Main extends Application {
     private static MotionPlanner planner;
     private static Configuration[][] queries;
 
-    private static void printObjectArray(Object[] data) {
-        for (Object aData : data) {
-            System.out.print(aData + ", ");
-        }
-        System.out.println();
-    }
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -78,10 +61,15 @@ public class Main extends Application {
 
         // running queries
         if (planner instanceof RRT) {
+            System.out.println("Running RRT...");
+
             RRT rrtPlanner = (RRT) planner;
 
             Configuration[] q = queries[0];
+
+            long startTime = System.currentTimeMillis();
             List<Configuration> path = rrtPlanner.query(q[0], q[1]);
+            System.out.println("Query took: " + (System.currentTimeMillis() - startTime) + "ms");
 
             // draw trees
             drawGraph(root, rrtPlanner.getSrcRRT(), Color.RED);
@@ -89,8 +77,20 @@ public class Main extends Application {
             animate(root, rrtPlanner.getEnvironment(), rrtPlanner.getLocalPlanner(), path);
 
         } else if (planner instanceof  PRM) {
-            PRM prmPlanner = (PRM) planner;
+            System.out.println("Running PRM...");
 
+            long startTime = System.currentTimeMillis();
+            PRM prmPlanner = (PRM) planner;
+            System.out.println("Constructing road map took: " + (System.currentTimeMillis() - startTime) + "ms");
+
+            Configuration[] q = queries[0];
+            startTime = System.currentTimeMillis();
+            List<Configuration> path = prmPlanner.query(q[0], q[1]);
+            System.out.println("Query took: " + (System.currentTimeMillis() - startTime) + "ms");
+
+            // draw road map
+            drawGraph(root, prmPlanner.getRoadMap(), Color.BLUE);
+            animate(root, prmPlanner.getEnvironment(), prmPlanner.getLocalPlanner(), path);
         } else {
             System.out.println("Unexpected error");
             return;
@@ -121,7 +121,10 @@ public class Main extends Application {
                 int numTrials = Integer.parseInt(props.get("TRIALS"));
                 planner = new RRT(env, new Sampler(), localPlanner, numTrials);
             } else {
-
+                // PRM
+                int numClosest = Integer.parseInt(props.get("NUM_CLOSEST"));
+                int numSamples = Integer.parseInt(props.get("NUM_SAMPLES"));
+                planner = new PRM(env, new Sampler(), localPlanner, numClosest, numSamples);
             }
 
             launch(args);
@@ -297,54 +300,5 @@ public class Main extends Application {
             }
         }
     }
-
-    private static void drawGraphPRM(Group root, Graph g, Color color) {
-        // draw nodes
-        for (int i = 0; i < g.size() - 2; i++) {
-            Configuration c = g.getVertex(i);
-            Circle circle = new Circle();
-            circle.setCenterX(c.getX());
-            circle.setCenterY(c.getY());
-            circle.setRadius(10.0);
-            circle.setFill(color);
-            root.getChildren().add(circle);
-        }
-
-        Configuration start = g.getVertex(g.size()-2);
-        Configuration end = g.getVertex(g.size()-1);
-
-        Circle circle = new Circle();
-        circle.setCenterX(start.getX());
-        circle.setCenterY(start.getY());
-        circle.setRadius(10.0);
-        circle.setFill(Color.RED);
-        root.getChildren().add(circle);
-
-        Circle circle2 = new Circle();
-        circle2.setCenterX(end.getX());
-        circle2.setCenterY(end.getY());
-        circle2.setRadius(10.0);
-        circle2.setFill(Color.PURPLE);
-        root.getChildren().add(circle2);
-
-
-        // draw edges
-        for (int i = 0; i < g.size() - 1; i++) {
-            for (int j = i + 1; j < g.size(); j++) {
-                if (g.isConnected(i, j)) {
-                    Line line = new Line();
-
-                    line.setStartX(g.getVertex(i).getX());
-                    line.setStartY(g.getVertex(i).getY());
-                    line.setEndX(g.getVertex(j).getX());
-                    line.setEndY(g.getVertex(j).getY());
-
-                    line.setStroke(color);
-                    root.getChildren().add(line);
-                }
-            }
-        }
-    }
-
 }
 
